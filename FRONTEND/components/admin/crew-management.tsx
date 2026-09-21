@@ -47,14 +47,17 @@ const CREW_CATEGORIES: CrewCategory[] = [
   "Eğitim ve Proje",
 ]
 
+const INITIAL_CREW = { name: "", role: "", description: "", photo_url: "", linkedin_url: "", github_url: "" }
+
 export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }) {
   const [crewMembers, setCrewMembers] = useState<Record<string, CrewMemberOut[]>>({})
   const [loading, setLoading] = useState(true)
   const [selectedCat, setSelectedCat] = useState<CrewCategory>("Başkan ve Yardımcılar")
+  const [isOpen, setIsOpen] = useState(false)
 
   // Ekleme State'leri
   const [addOpen, setAddOpen] = useState(false)
-  const initialNewCrewState = { name: "", role: "", description: "", photo_url: "", linkedin_url: "", github_url: "" }
+  const initialNewCrewState = INITIAL_CREW
   const [newCrew, setNewCrew] = useState(initialNewCrewState)
 
   // Düzenleme State'leri
@@ -186,6 +189,17 @@ export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }
     }
   }
 
+  const handleManageOpenChange = (open: boolean) => {
+    if (!open) {
+      setAddOpen(false)
+      setEditOpen(false)
+      setNewCrew(INITIAL_CREW)
+      setCrewFile(null)
+      setEditCrew(null)
+    }
+    setIsOpen(open)
+  }
+
   // Dialog açılışlarında dosya state'ini temizle
   const openAddDialog = (open: boolean) => {
     if (open) setCrewFile(null)
@@ -199,7 +213,7 @@ export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }
   }
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={handleManageOpenChange}>
       <DialogTrigger asChild>
         <Button size="sm" className="bg-ayzek-gradient hover:opacity-90 w-full">
           <Edit className="w-4 h-4 mr-2" /> Ekibi Yönet

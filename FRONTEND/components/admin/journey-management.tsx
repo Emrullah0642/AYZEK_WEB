@@ -35,14 +35,17 @@ const normalizeImageUrl = (v: string | null) => {
   return `${API_BASE}/public/uploads${path}`
 }
 
+const INITIAL_JOURNEY_PERSON = { name: "", role: "", description: "", photo_url: "" }
+
 export function JourneyManagement({ onNotify }: { onNotify: (msg: string) => void }) {
   const [journeyPeople, setJourneyPeople] = useState<Record<number, JourneyPersonOut[]>>({})
   const [loading, setLoading] = useState(true)
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear())
+  const [isOpen, setIsOpen] = useState(false)
 
   // Ekleme State'leri
   const [addOpen, setAddOpen] = useState(false)
-  const [newPerson, setNewPerson] = useState({ name: "", role: "", description: "", photo_url: "" })
+  const [newPerson, setNewPerson] = useState(INITIAL_JOURNEY_PERSON)
 
   // Düzenleme State'leri
   const [editOpen, setEditOpen] = useState(false)
@@ -176,6 +179,17 @@ export function JourneyManagement({ onNotify }: { onNotify: (msg: string) => voi
   }
 
   // Dialog açılışlarında dosya state'ini temizle
+  const handleManageOpenChange = (open: boolean) => {
+    if (!open) {
+      setAddOpen(false)
+      setEditOpen(false)
+      setNewPerson(INITIAL_JOURNEY_PERSON)
+      setJourneyFile(null)
+      setEditPerson(null)
+    }
+    setIsOpen(open)
+  }
+
   const openAddDialog = (open: boolean) => {
     if (open) setJourneyFile(null)
     setAddOpen(open)
@@ -188,7 +202,7 @@ export function JourneyManagement({ onNotify }: { onNotify: (msg: string) => voi
   }
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={handleManageOpenChange}>
       <DialogTrigger asChild>
         <Button size="sm" className="bg-ayzek-gradient hover:opacity-90 w-full">
           <Edit className="w-4 h-4 mr-2" /> Yılları Yönet

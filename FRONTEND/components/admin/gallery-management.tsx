@@ -36,12 +36,15 @@ const normalizeImageUrl = (v: string) => {
   return `${API_BASE}/public/uploads${path}`
 }
 
+const INITIAL_GALLERY_ITEM = { title: "", description: "", image_url: "", category: "Workshop", date: "", location: "" }
+
 export function GalleryManagement({ onNotify }: { onNotify: (msg: string) => void }) {
   const [items, setItems] = useState<GalleryEvent[]>([])
+  const [isOpen, setIsOpen] = useState(false)
 
   // Ekleme State'leri
   const [addOpen, setAddOpen] = useState(false)
-  const [newItem, setNewItem] = useState({ title: "", description: "", image_url: "", category: "Workshop", date: "", location: "" })
+  const [newItem, setNewItem] = useState(INITIAL_GALLERY_ITEM)
 
   // Düzenleme State'leri
   const [editOpen, setEditOpen] = useState(false)
@@ -151,6 +154,17 @@ export function GalleryManagement({ onNotify }: { onNotify: (msg: string) => voi
     }
   }
 
+  const handleManageOpenChange = (open: boolean) => {
+    if (!open) {
+      setAddOpen(false)
+      setEditOpen(false)
+      setNewItem(INITIAL_GALLERY_ITEM)
+      setGalleryFile(null)
+      setEditItem(null)
+    }
+    setIsOpen(open)
+  }
+
   // Dialog açılışlarında dosya state'ini temizle
   const openAddDialog = (open: boolean) => {
     if (open) setGalleryFile(null)
@@ -164,7 +178,7 @@ export function GalleryManagement({ onNotify }: { onNotify: (msg: string) => voi
   }
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={handleManageOpenChange}>
       <DialogTrigger asChild>
         <Button size="sm" className="bg-ayzek-gradient hover:opacity-90 w-full">
           <Edit className="w-4 h-4 mr-2" /> Galeri Yönet

@@ -36,13 +36,16 @@ const normalizeImageUrl = (v: string) => {
   return `${API_BASE}/public/uploads${path}`
 }
 
+const INITIAL_TIMELINE_ITEM = { title: "", description: "", date_label: "", sort_date: "", category: "milestone", image_url: "" }
+
 export function TimelineManagement({ onNotify }: { onNotify: (msg: string) => void }) {
   const [items, setItems] = useState<TimelineOut[]>([])
   const [loading, setLoading] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
 
   // Ekleme State'leri
   const [addOpen, setAddOpen] = useState(false)
-  const [newItem, setNewItem] = useState({ title: "", description: "", date_label: "", sort_date: "", category: "milestone", image_url: "" })
+  const [newItem, setNewItem] = useState(INITIAL_TIMELINE_ITEM)
 
   // Düzenleme State'leri
   const [editOpen, setEditOpen] = useState(false)
@@ -163,6 +166,17 @@ export function TimelineManagement({ onNotify }: { onNotify: (msg: string) => vo
     }
   }
 
+  const handleManageOpenChange = (open: boolean) => {
+    if (!open) {
+      setAddOpen(false)
+      setEditOpen(false)
+      setNewItem(INITIAL_TIMELINE_ITEM)
+      setTimelineFile(null)
+      setEditItem(null)
+    }
+    setIsOpen(open)
+  }
+
   const openAddDialog = (open: boolean) => {
     if (open) setTimelineFile(null)
     setAddOpen(open)
@@ -175,7 +189,7 @@ export function TimelineManagement({ onNotify }: { onNotify: (msg: string) => vo
   }
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={handleManageOpenChange}>
       <DialogTrigger asChild>
         <Button size="sm" className="bg-ayzek-gradient hover:opacity-90 w-full">
           <Edit className="w-4 h-4 mr-2" /> Timeline Düzenle

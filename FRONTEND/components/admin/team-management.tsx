@@ -51,21 +51,24 @@ type NewTeamMember = {
   linkedin_url: string
 }
 
+const INITIAL_TEAM = {
+  name: "",
+  project_name: "",
+  category: "",
+  description: "",
+  photo_url: "",
+  is_featured: false,
+  members: [{ name: "", role: "", linkedin_url: "" }],
+}
+
 export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }) {
   const [teams, setTeams] = useState<TeamOut[]>([])
   const [loading, setLoading] = useState(true)
+  const [isOpen, setIsOpen] = useState(false)
 
   // Ekleme State'leri
   const [addOpen, setAddOpen] = useState(false)
-  const initialNewTeamState = {
-    name: "",
-    project_name: "",
-    category: "",
-    description: "",
-    photo_url: "",
-    is_featured: false,
-    members: [{ name: "", role: "", linkedin_url: "" }],
-  }
+  const initialNewTeamState = INITIAL_TEAM
   const [newTeam, setNewTeam] = useState(initialNewTeamState)
 
   // Düzenleme State'leri
@@ -209,6 +212,17 @@ export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }
     }
   }
 
+  const handleManageOpenChange = (open: boolean) => {
+    if (!open) {
+      setAddOpen(false)
+      setEditOpen(false)
+      setNewTeam(INITIAL_TEAM)
+      setTeamFile(null)
+      setEditTeam(null)
+    }
+    setIsOpen(open)
+  }
+
   // Dialog açılışlarında dosya state'ini temizle
   const openAddDialog = (open: boolean) => {
     if (open) setTeamFile(null)
@@ -222,7 +236,7 @@ export function TeamManagement({ onNotify }: { onNotify: (msg: string) => void }
   }
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={handleManageOpenChange}>
       <DialogTrigger asChild>
         <Button size="sm" className="bg-ayzek-gradient hover:opacity-90 w-full">
           <Edit className="w-4 h-4 mr-2" /> Takımları Yönet

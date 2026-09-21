@@ -49,13 +49,16 @@ const fmtDateTR = (d: string) => {
   return isNaN(+dt) ? d : dt.toLocaleDateString("tr-TR", { day: "2-digit", month: "long", year: "numeric" })
 }
 
+const INITIAL_BLOG = { title: "", description: "", author: "", category: "", image: "", date: "", preview: "" }
+
 export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }) {
   const [items, setItems] = useState<BlogOut[]>([])
   const [loading, setLoading] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
 
   // Ekleme State'leri
   const [addOpen, setAddOpen] = useState(false)
-  const [newBlog, setNewBlog] = useState({ title: "", description: "", author: "", category: "", image: "", date: "", preview: "" })
+  const [newBlog, setNewBlog] = useState(INITIAL_BLOG)
 
   // Düzenleme State'leri
   const [editOpen, setEditOpen] = useState(false)
@@ -166,6 +169,17 @@ export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }
     }
   }
 
+  const handleManageOpenChange = (open: boolean) => {
+    if (!open) {
+      setAddOpen(false)
+      setEditOpen(false)
+      setNewBlog(INITIAL_BLOG)
+      setBlogFile(null)
+      setEditBlog(null)
+    }
+    setIsOpen(open)
+  }
+
   const openAddDialog = (open: boolean) => {
     if (open) setBlogFile(null)
     setAddOpen(open)
@@ -178,7 +192,7 @@ export function BlogManagement({ onNotify }: { onNotify: (msg: string) => void }
   }
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={handleManageOpenChange}>
       <DialogTrigger asChild>
         <Button size="sm" className="bg-ayzek-gradient hover:opacity-90 w-full">
           <Edit className="w-4 h-4 mr-2" /> Blogları Yönet

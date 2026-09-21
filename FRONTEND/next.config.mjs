@@ -18,11 +18,12 @@ const nextConfig = {
         hostname: '*.r2.dev',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'cdn.ayzek.tr',
+        pathname: '/**',
+      },
     ],
-    // 👇 İŞTE ÇÖZÜM BU SATIRDA!
-    // Bu satır sayesinde "Motor bozuk" hatası (500) gelmeyecek, resim direkt açılacak.
-    unoptimized: true, 
   },
 }
-
 export default nextConfig

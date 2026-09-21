@@ -36,12 +36,15 @@ const normalizeImageUrl = (v: string) => {
   return `${API_BASE}/public/uploads${path}`
 }
 
+const INITIAL_POSTER = { title: "", subtitle: "", content: "", image_url: "" }
+
 export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void }) {
   const [posterItems, setPosterItems] = useState<PosterOut[]>([])
+  const [isOpen, setIsOpen] = useState(false)
 
   // Ekleme State'leri
   const [isAddOpen, setIsAddOpen] = useState(false)
-  const [newPoster, setNewPoster] = useState({ title: "", subtitle: "", content: "", image_url: "" })
+  const [newPoster, setNewPoster] = useState(INITIAL_POSTER)
 
   // Düzenleme State'leri
   const [editOpen, setEditOpen] = useState(false)
@@ -49,6 +52,17 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
 
   // Ortak Dosya State'i
   const [posterFile, setPosterFile] = useState<File | null>(null)
+
+  const handleManageOpenChange = (open: boolean) => {
+    if (!open) {
+      setIsAddOpen(false)
+      setEditOpen(false)
+      setNewPoster(INITIAL_POSTER)
+      setPosterFile(null)
+      setEditPoster(null)
+    }
+    setIsOpen(open)
+  }
 
   useEffect(() => {
     fetchPosters()
@@ -155,7 +169,7 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
   }
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={handleManageOpenChange}>
       <DialogTrigger asChild>
         <Button size="sm" className="bg-ayzek-gradient hover:opacity-90 w-full">
           <Edit className="w-4 h-4 mr-2" /> Posterleri Yönet
