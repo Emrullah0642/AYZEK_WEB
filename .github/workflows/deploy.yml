@@ -1,0 +1,30 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sunucuya deploy et
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          command_timeout: 30m
+          script: |
+            set -e
+            cd /opt/ayzek
+            git fetch origin main
+            git reset --hard origin/main
+            docker compose up -d --build --remove-orphans
+            docker image prune -f
+            docker compose ps

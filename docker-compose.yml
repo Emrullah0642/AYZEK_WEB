@@ -1,12 +1,10 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:17
     container_name: ayzek_db
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: emrullah2456
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?.env icinde POSTGRES_PASSWORD tanimli degil}
       POSTGRES_DB: ayzek_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -18,25 +16,20 @@ services:
     depends_on:
       - db
     environment:
-      DATABASE_URL: postgresql+psycopg2://postgres:emrullah2456@db:5432/ayzek_db
+      # Gizli değerler (JWT_SECRET_KEY, R2_*) .env dosyasından gelir
+      DATABASE_URL: postgresql+psycopg2://postgres:${POSTGRES_PASSWORD}@db:5432/ayzek_db
       ALLOWED_ORIGINS: "https://ayzek.tr, https://api.ayzek.tr"
-      JWT_SECRET_KEY: n10Gk-fDq7R3L2pQc_jH8sX4wV9bY6aE-tZ5uI8oP2rS1mC7
-      ALGORITHM: "HS256"
-      ACCESS_TOKEN_EXPIRE_MINUTES: 30
     env_file:
       - .env
     volumes:
       # Yüklenen orijinal resimler kaybolmasın diye:
       - ./BACKEND/public/uploads:/app/public/uploads
-    ports:
-      - "8000:8000"
+    # Dışarı port açılmıyor; trafik nginx üzerinden geliyor
     restart: always
 
   ayzek-frontend:
     build: ./FRONTEND
     container_name: ayzek_frontend_cont
-    ports:
-      - "3000:3000"
     depends_on:
       - ayzek-backend
     environment:
