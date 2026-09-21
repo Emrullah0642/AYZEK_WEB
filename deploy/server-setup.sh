@@ -8,7 +8,7 @@ APP_DIR="/opt/ayzek"
 
 echo ">> Paketler güncelleniyor"
 apt-get update && apt-get upgrade -y
-apt-get install -y ca-certificates curl git ufw certbot
+apt-get install -y ca-certificates curl git ufw
 
 echo ">> Docker kuruluyor"
 if ! command -v docker >/dev/null; then
@@ -36,12 +36,6 @@ if [ ! -d "$APP_DIR/.git" ]; then
 fi
 mkdir -p "$APP_DIR/BACKEND/public/uploads"
 
-echo ">> Sertifika yenilemesi için nginx durdur/başlat hook'ları"
-mkdir -p /etc/letsencrypt/renewal-hooks/pre /etc/letsencrypt/renewal-hooks/post
-printf '#!/bin/sh\ncd %s && docker compose stop nginx\n' "$APP_DIR" > /etc/letsencrypt/renewal-hooks/pre/stop-nginx.sh
-printf '#!/bin/sh\ncd %s && docker compose start nginx\n' "$APP_DIR" > /etc/letsencrypt/renewal-hooks/post/start-nginx.sh
-chmod +x /etc/letsencrypt/renewal-hooks/pre/stop-nginx.sh /etc/letsencrypt/renewal-hooks/post/start-nginx.sh
-
 echo ">> GitHub Actions için deploy anahtarı oluşturuluyor"
 if [ ! -f /root/.ssh/github_deploy ]; then
   mkdir -p /root/.ssh && chmod 700 /root/.ssh
@@ -58,9 +52,11 @@ Kurulum tamam. Kalan adımlar:
 1) .env oluştur:
      cp $APP_DIR/.env.example $APP_DIR/.env && nano $APP_DIR/.env
 
-2) SSL sertifikası al (DNS'te ayzek.tr, www.ayzek.tr, api.ayzek.tr
-   bu sunucunun IP'sini göstermeli; 80 portu boş olmalı):
-     certbot certonly --standalone -d ayzek.tr -d www.ayzek.tr -d api.ayzek.tr
+2) SSL: Cloudflare proxy (turuncu bulut) arkasında çalışıyoruz.
+   Sertifika /etc/ssl/ayzek/origin.pem ve origin.key olmalı
+   (Cloudflare > SSL/TLS > Origin Server > Create Certificate).
+   Sistemde nginx varsa kapatın:
+     systemctl disable --now nginx
 
 3) İlk kez ayağa kaldır:
      cd $APP_DIR && docker compose up -d --build
