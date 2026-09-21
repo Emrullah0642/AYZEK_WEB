@@ -7,6 +7,13 @@ __pycache__/
 .DS_Store
 *.db
 *.sqlite3
+*.save
+.next/
+dist/
+build/
+*.log
+.vscode/
+.idea/
 
 # --- BACKEND RESİM YÜKLEMELERİ ---
 # Klasör dursun ama içindeki resimler gitmesin
