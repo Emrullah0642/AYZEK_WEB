@@ -1,0 +1,47 @@
+services:
+  db:
+    image: postgres:17
+    container_name: ayzek_db_local
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?.env icinde POSTGRES_PASSWORD tanimli degil}
+      POSTGRES_DB: ayzek_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_local:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  ayzek-backend:
+    build: ./BACKEND
+    container_name: ayzek_backend_local
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql+psycopg2://postgres:${POSTGRES_PASSWORD}@db:5432/ayzek_db
+      ALLOWED_ORIGINS: "http://localhost:3000"
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./BACKEND/public/uploads:/app/public/uploads
+    restart: unless-stopped
+
+  ayzek-frontend:
+    build:
+      context: ./FRONTEND
+      args:
+        NEXT_PUBLIC_API_BASE: http://localhost:8000
+    container_name: ayzek_frontend_local
+    depends_on:
+      - ayzek-backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - nextjs_cache_local:/app/.next/cache
+    restart: unless-stopped
+
+volumes:
+  postgres_data_local:
+  nextjs_cache_local:
