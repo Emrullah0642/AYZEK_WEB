@@ -5,76 +5,81 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Dark-first AYZEK paleti (light tema kaldırıldı) */
-  --background: oklch(0.12 0.005 240);
-  --foreground: oklch(0.98 0.003 240);
-  --card: oklch(0.15 0.005 240);
-  --card-foreground: oklch(0.98 0.003 240);
-  --popover: oklch(0.15 0.005 240);
-  --popover-foreground: oklch(0.98 0.003 240);
-  --primary: oklch(0.65 0.2 240);
-  --primary-foreground: oklch(0.12 0.005 240);
-  --secondary: oklch(0.2 0.01 240);
-  --secondary-foreground: oklch(0.98 0.003 240);
-  --muted: oklch(0.2 0.01 240);
-  --muted-foreground: oklch(0.7 0.005 240);
-  --accent: oklch(0.7 0.18 200);
-  --accent-foreground: oklch(0.12 0.005 240);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.2 0.01 240);
-  --input: oklch(0.2 0.01 240);
-  --ring: oklch(0.65 0.2 240 / 0.5);
-  --chart-1: oklch(0.65 0.2 240);
-  --chart-2: oklch(0.7 0.18 200);
-  --chart-3: oklch(0.7 0.005 240);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.735 0.234 83.671);
-  --radius: 0.5rem;
-  --sidebar: oklch(0.15 0.005 240);
-  --sidebar-foreground: oklch(0.98 0.003 240);
-  --sidebar-primary: oklch(0.65 0.2 240);
-  --sidebar-primary-foreground: oklch(0.12 0.005 240);
-  --sidebar-accent: oklch(0.2 0.01 240);
-  --sidebar-accent-foreground: oklch(0.98 0.003 240);
-  --sidebar-border: oklch(0.2 0.01 240);
-  --sidebar-ring: oklch(0.65 0.2 240 / 0.5);
+  /* AYZEK v9 — AÇIK tema: verilen paletin okunur/gündüz karşılığı */
+  --background: #F5F7FB;
+  --foreground: #0F172A;
+  --card: #FFFFFF;
+  --card-foreground: #0F172A;
+  --popover: #FFFFFF;
+  --popover-foreground: #0F172A;
+  --primary: #2563EB;
+  --primary-foreground: #F8FAFC;
+  --secondary: #E9EEF6;
+  --secondary-foreground: #0F172A;
+  --muted: #E9EEF6;
+  --muted-foreground: #55647A;
+  --accent: #0E9DB8;
+  --accent-foreground: #F8FAFC;
+  --destructive: oklch(0.55 0.2 25);
+  --destructive-foreground: oklch(0.99 0.01 25);
+  --border: #0F172A22;
+  --input: #0F172A2E;
+  --ring: #2563EB80;
+  --chart-1: #2563EB;
+  --chart-2: #0E9DB8;
+  --chart-3: #8B5CF6;
+  --chart-4: #55647A;
+  --chart-5: #33415C;
+  --radius: 0.65rem;
+  --sidebar: #F5F7FB;
+  --sidebar-foreground: #0F172A;
+  --sidebar-primary: #2563EB;
+  --sidebar-primary-foreground: #F8FAFC;
+  --sidebar-accent: #E9EEF6;
+  --sidebar-accent-foreground: #0F172A;
+  --sidebar-border: #0F172A22;
+  --sidebar-ring: #2563EB80;
 }
 
 .dark {
-  /* Aynı değerleri koruyarak .dark sınıfını uyumlu bırakıyoruz */
-  --background: oklch(0.12 0.005 240);
-  --foreground: oklch(0.98 0.003 240);
-  --card: oklch(0.15 0.005 240);
-  --card-foreground: oklch(0.98 0.003 240);
-  --popover: oklch(0.15 0.005 240);
-  --popover-foreground: oklch(0.98 0.003 240);
-  --primary: oklch(0.65 0.2 240);
-  --primary-foreground: oklch(0.12 0.005 240);
-  --secondary: oklch(0.2 0.01 240);
-  --secondary-foreground: oklch(0.98 0.003 240);
-  --muted: oklch(0.2 0.01 240);
-  --muted-foreground: oklch(0.7 0.005 240);
-  --accent: oklch(0.7 0.18 200);
-  --accent-foreground: oklch(0.12 0.005 240);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.2 0.01 240);
-  --input: oklch(0.2 0.01 240);
-  --ring: oklch(0.65 0.2 240 / 0.5);
-  --chart-1: oklch(0.65 0.2 240);
-  --chart-2: oklch(0.7 0.18 200);
-  --chart-3: oklch(0.7 0.005 240);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.735 0.234 83.671);
-  --sidebar: oklch(0.15 0.005 240);
-  --sidebar-foreground: oklch(0.98 0.003 240);
-  --sidebar-primary: oklch(0.65 0.2 240);
-  --sidebar-primary-foreground: oklch(0.12 0.005 240);
-  --sidebar-accent: oklch(0.2 0.01 240);
-  --sidebar-accent-foreground: oklch(0.98 0.003 240);
-  --sidebar-border: oklch(0.2 0.01 240);
-  --sidebar-ring: oklch(0.65 0.2 240 / 0.5);
+  /* AYZEK v9 — KOYU tema (varsayılan): kullanıcı paleti */
+  --background: #070B14;
+  --foreground: #F8FAFC;
+  --card: #0D1625;
+  --card-foreground: #F8FAFC;
+  --popover: #0D1625;
+  --popover-foreground: #F8FAFC;
+  --primary: #2563EB;
+  --primary-foreground: #F8FAFC;
+  --secondary: #131F33;
+  --secondary-foreground: #F8FAFC;
+  --muted: #131F33;
+  --muted-foreground: #94A3B8;
+  --accent: #22D3EE;
+  --accent-foreground: #070B14;
+  --destructive: oklch(0.6 0.2 25);
+  --destructive-foreground: oklch(0.97 0.01 25);
+  --border: #F8FAFC24;
+  --input: #F8FAFC29;
+  --ring: #2563EB80;
+  --chart-1: #2563EB;
+  --chart-2: #22D3EE;
+  --chart-3: #8B5CF6;
+  --chart-4: #94A3B8;
+  --chart-5: #55647A;
+  --sidebar: #0A101C;
+  --sidebar-foreground: #F8FAFC;
+  --sidebar-primary: #2563EB;
+  --sidebar-primary-foreground: #F8FAFC;
+  --sidebar-accent: #131F33;
+  --sidebar-accent-foreground: #F8FAFC;
+  --sidebar-border: #F8FAFC24;
+  --sidebar-ring: #2563EB80;
+}
+
+/* Mor vurgu — token sisteminde ayrı bir renk olarak, gradyan/dekoratif noktalarda kullanılır */
+:root, .dark {
+  --violet: #8B5CF6;
 }
 
 @theme inline {
@@ -115,9 +120,10 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* Added Inter and Orbitron font configuration */
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Orbitron", ui-sans-serif, system-ui, sans-serif;
+  /* Geist Sans (gövde metni) + Space Grotesk (başlıklar) — next/font ile self-hosted */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-mono-ui: var(--font-jetbrains-mono), ui-monospace, "SF Mono", monospace;
 }
 
 @layer base {
@@ -133,13 +139,19 @@
     font-family: var(--font-display);
   }
 
+  /* Terminal/route etiketleri için — bölüm başlıklarının üstünde küçük mono "yol" ipucu */
+  .font-route {
+    font-family: var(--font-mono-ui);
+    font-feature-settings: "tnum";
+  }
+
   /* Enhanced scroll behavior and theme transitions */
   html {
     scroll-behavior: smooth;
     transition: color-scheme 0.3s ease;
+    color-scheme: light;
   }
 
-  /* Dark mode color scheme */
   html.dark {
     color-scheme: dark;
   }
@@ -151,20 +163,26 @@
     scroll-behavior: smooth;
   }
 
-  /* AYZEK brand gradients */
+  /* AYZEK brand — mavi → mor geçişi */
   .bg-ayzek-gradient {
-    background: linear-gradient(135deg, #0072ff 0%, #00c6ff 100%);
+    background: linear-gradient(135deg, #2563EB 0%, #8B5CF6 100%);
   }
 
   .text-ayzek-gradient {
-    background: linear-gradient(135deg, #0072ff 0%, #00c6ff 100%);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #1D4ED8;
+  }
+
+  .dark .text-ayzek-gradient {
+    color: #22D3EE;
   }
 
   .border-ayzek-gradient {
-    border-image: linear-gradient(135deg, #0072ff 0%, #00c6ff 100%) 1;
+    border-image: linear-gradient(135deg, #2563EB 0%, #8B5CF6 100%) 1;
+  }
+
+  /* Koyu temada hero gibi parlak alanlarda kullanılan yumuşak glow gölgesi */
+  .glow-primary {
+    filter: drop-shadow(0 0 24px rgba(34,211,238,0.35));
   }
 
   .animate-fade-in {
@@ -245,14 +263,19 @@
     left: 100%;
   }
 
-  /* Updated gradient text to use AYZEK colors */
+  /* Logo paleti başlık vurgusu — açık zeminde koyu, koyu zeminde parlak/açık ton */
   .gradient-text {
-    background: linear-gradient(135deg, #0072ff, #00c6ff);
+    background: linear-gradient(135deg, #1D4ED8 0%, #2563EB 45%, #7C3AED 100%);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    background-size: 200% 200%;
-    animation: gradientShift 3s ease-in-out infinite;
+  }
+
+  .dark .gradient-text {
+    background: linear-gradient(135deg, #60A5FA 0%, #22D3EE 55%, #A78BFA 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
   /* Smooth theme transitions */
@@ -358,13 +381,171 @@
   animation: float 3s ease-in-out infinite;
 }
 
-/* Enhanced focus states for accessibility */
-.focus-ring {
-  @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background;
+/* Arka plan glow kütleleri — çok yavaş, zar zor fark edilen "nefes alma" */
+@keyframes glowDrift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-4%, 3%) scale(1.08); }
+}
+@keyframes glowDriftReverse {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(4%, -3%) scale(1.1); }
+}
+.animate-glow-drift {
+  animation: glowDrift 22s ease-in-out infinite;
+}
+.animate-glow-drift-reverse {
+  animation: glowDriftReverse 26s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-glow-drift,
+  .animate-glow-drift-reverse {
+    animation: none;
+  }
 }
 
-.dark .focus-ring {
-  @apply focus:ring-offset-background;
+/* Hero halkaları — çok yavaş, zar zor fark edilen dönüş */
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes spinSlowReverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+.animate-spin-slow {
+  animation: spinSlow 40s linear infinite;
+}
+.animate-spin-slow-reverse {
+  animation: spinSlowReverse 55s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-spin-slow,
+  .animate-spin-slow-reverse {
+    animation: none;
+  }
+}
+
+/* Buton üstünden geçen ince ışık — sadece birincil CTA'larda, tek seferlik değil hover'da */
+.btn-sweep {
+  position: relative;
+  overflow: hidden;
+}
+.btn-sweep::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.35) 45%, rgba(255,255,255,0.35) 55%, transparent 70%);
+  transform: translateX(-120%);
+  transition: transform 0.7s ease;
+}
+.btn-sweep:hover::after {
+  transform: translateX(120%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn-sweep::after {
+    display: none;
+  }
+}
+
+/* Değer kartı ikonu — hover'da (kart dönmeye başlarken) kısa bir parlama */
+.flip-card:hover .icon-glow {
+  filter: drop-shadow(0 0 10px rgba(248,250,252,0.8));
+  transition: filter 0.3s ease;
+}
+
+/* Canlı veri göstergesi — durum panelindeki nokta yavaşça nabız atar */
+@keyframes livePulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(37,99,235,0.5); }
+  50% { opacity: 0.55; box-shadow: 0 0 0 4px rgba(37,99,235,0); }
+}
+.status-dot {
+  animation: livePulse 2.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .status-dot {
+    animation: none;
+  }
+}
+
+/* Teknik çizim köşe işaretleri — durum panelinin dört köşesinde hizalama referansı */
+.tech-corners::before,
+.tech-corners::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+}
+.tech-corners::before {
+  top: -1px;
+  left: -1px;
+  border-top: 1.5px solid var(--primary);
+  border-left: 1.5px solid var(--primary);
+}
+.tech-corners::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 1.5px solid var(--primary);
+  border-right: 1.5px solid var(--primary);
+}
+
+/* Değer kartları — üzerine gelince 3D ters çevrilen kart */
+.flip-card {
+  perspective: 1200px;
+}
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+.flip-card:hover .flip-card-inner,
+.flip-card:focus-within .flip-card-inner {
+  transform: rotateY(180deg);
+}
+.flip-card-front,
+.flip-card-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.flip-card-back {
+  transform: rotateY(180deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .flip-card-inner {
+    transition: none;
+  }
+}
+
+/* Enhanced focus states for accessibility — sadece klavye odağında görünür, fare tıklamasında sessiz */
+.focus-ring {
+  @apply outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+}
+
+/* İmleç takipli spotlight — JS sadece --x/--y günceller, görsel iş burada */
+.spotlight {
+  position: relative;
+}
+.spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  background: radial-gradient(280px circle at var(--x, 50%) var(--y, 50%), rgba(37,99,235,0.16), transparent 70%);
+}
+.spotlight:hover::before {
+  opacity: 1;
+}
+@media (hover: none) {
+  .spotlight::before {
+    display: none;
+  }
 }
 
 /* ===================================================================== */
@@ -447,5 +628,31 @@
   }
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Tam-genişlik bölüm bandı: art arda gelen bölümlerin hepsi aynı düz zeminde durmasın diye */
+  .section-band {
+    position: relative;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+  }
+  .section-band::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: oklch(0.17 0.03 255 / 3.5%);
+    border-top: 1px solid oklch(0.17 0.03 255 / 12%);
+    border-bottom: 1px solid oklch(0.17 0.03 255 / 12%);
+    z-index: 0;
+  }
+  .dark .section-band::before {
+    background: oklch(1 0 0 / 2.5%);
+    border-top-color: oklch(1 0 0 / 7%);
+    border-bottom-color: oklch(1 0 0 / 7%);
+  }
+  .section-band > * {
+    position: relative;
+    z-index: 1;
   }
 }

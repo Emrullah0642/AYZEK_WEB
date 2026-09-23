@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 export function JoinCommunityForm() {
   return (
-    <Card className="max-w-4xl mx-auto bg-[#bfbfbf] border border-white/10">
+    <Card className="max-w-4xl mx-auto bg-[#bfbfbf] border border-foreground/10">
       <CardHeader className="text-center p-4 sm:p-5 md:p-6">
         <CardTitle className="text-xl sm:text-2xl md:text-3xl font-display text-black">AYZEK Topluluğuna Katıl</CardTitle>
         <CardDescription className="text-sm sm:text-base md:text-lg text-black/80">

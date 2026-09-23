@@ -40,7 +40,7 @@ type YearSlide = {
 
 function PersonCard({ leader }: { leader: Leader }) {
   return (
-    <Card className="bg-white/90 dark:bg-black/70 border border-black/10 dark:border-white/10 backdrop-blur-sm transition-shadow hover:shadow-lg h-full">
+    <Card className="bg-white/90 dark:bg-black/70 border border-black/10 dark:border-foreground/10 backdrop-blur-sm transition-shadow hover:shadow-lg h-full">
       <CardHeader className="text-center p-2.5 sm:p-3 md:p-4">
         <div className="relative w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 mx-auto mb-2 sm:mb-2.5 md:mb-3">
           <Image
@@ -132,9 +132,14 @@ export function CommunityJourney() {
     }
   }
 
-  if (isLoading) return <div className="text-center py-20">Zaman Çizelgesi yükleniyor...</div>
-  if (error) return <div className="text-center py-20 text-red-500">Hata: {error}</div>
-  if (slides.length === 0) return <div className="text-center py-20 text-muted-foreground">Gösterilecek 'Yolculuğumuz' verisi bulunamadı.</div>
+  if (isLoading) return <div className="text-center py-16 text-sm text-muted-foreground">Zaman çizelgesi yükleniyor...</div>
+  if (error) return (
+    <div className="flex flex-col items-center justify-center gap-1.5 py-16 text-center px-4">
+      <p className="text-muted-foreground text-sm">Topluluk yolculuğu şu anda yüklenemedi.</p>
+      <p className="text-muted-foreground/60 text-xs">Birazdan tekrar dene.</p>
+    </div>
+  )
+  if (slides.length === 0) return <div className="text-center py-16 text-sm text-muted-foreground">Gösterilecek "Yolculuğumuz" verisi bulunamadı.</div>
 
   const currentYear = slides[activeIdx]?.year ?? slides[0]?.year;
   const slide = slides[activeIdx];
@@ -142,8 +147,8 @@ export function CommunityJourney() {
   return (
     <section className="relative py-10 sm:py-12 md:py-16">
       <div className="text-center mb-6 sm:mb-8 md:mb-10 px-2">
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-2 sm:mb-3 md:mb-4 gradient-text">Zaman Çizelgemiz</h2>
-        <p className="text-muted-foreground max-w-2xl mx-auto text-xs sm:text-sm md:text-base">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold mb-3 sm:mb-4 text-foreground">Zaman çizelgemiz</h2>
+        <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base">
           AYZEK'i teknoloji meraklıları ve yenilikçiler için canlı bir topluluk haline getiren tutkulu bireylerdir.
         </p>
       </div>
@@ -168,7 +173,7 @@ export function CommunityJourney() {
           transition={{ type: "spring", stiffness: 300, damping: 20 }}
           className="absolute left-1/2 -translate-x-1/2 -top-2 sm:-top-2.5 md:-top-3"
         >
-          <div className="px-4 py-1.5 sm:px-5 sm:py-2 md:px-6 md:py-2 rounded-xl sm:rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-400 text-white text-base sm:text-lg md:text-xl font-bold shadow-lg border border-white/20">
+          <div className="px-4 py-1.5 sm:px-5 sm:py-2 md:px-6 md:py-2 rounded-xl sm:rounded-2xl bg-ayzek-gradient text-primary-foreground text-base sm:text-lg md:text-xl font-bold shadow-lg border border-foreground/20">
             {currentYear}
           </div>
         </motion.div>

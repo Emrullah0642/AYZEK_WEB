@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import Image from "next/image";
 
 type Poster = {
@@ -158,7 +158,25 @@ export function AutoSlidingBanner() {
   };
 
   if (!activeSlides.length) {
-    return <div className="h-[280px] sm:h-[360px] md:h-[500px] lg:h-[650px] xl:h-[700px] rounded-lg md:rounded-xl bg-muted/40" />;
+    return (
+      <div className="relative h-[280px] sm:h-[360px] md:h-[500px] lg:h-[650px] xl:h-[700px] rounded-2xl overflow-hidden border border-foreground/10 bg-gradient-to-br from-primary/10 via-card/60 to-accent/10">
+        <div
+          className="absolute inset-0 opacity-40"
+          style={{
+            backgroundImage: "radial-gradient(oklch(1 0 0 / 8%) 1px, transparent 1px)",
+            backgroundSize: "24px 24px",
+          }}
+        />
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center px-6">
+          <div className="grid place-items-center size-12 sm:size-14 rounded-full bg-gradient-to-br from-primary/25 to-accent/15 ring-1 ring-foreground/15">
+            <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+          </div>
+          <p className="text-muted-foreground text-xs sm:text-sm max-w-xs">
+            Yakında burada öne çıkan duyurular ve etkinlik afişleri olacak.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -234,9 +252,9 @@ export function AutoSlidingBanner() {
             className={[
               "absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-30",
               "inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full",
-              "bg-transparent border border-white/35 hover:border-white/80",
+              "bg-transparent border border-foreground/35 hover:border-foreground/80",
               "backdrop-blur-0",
-              "transition focus:outline-none focus:ring-2 focus:ring-white/40",
+              "transition focus:outline-none focus:ring-2 focus:ring-foreground/40",
               current === 0 ? "opacity-50 cursor-not-allowed" : "",
             ].join(" ")}
           >
@@ -251,9 +269,9 @@ export function AutoSlidingBanner() {
             className={[
               "absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-30",
               "inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full",
-              "bg-transparent border border-white/35 hover:border-white/80",
+              "bg-transparent border border-foreground/35 hover:border-foreground/80",
               "backdrop-blur-0",
-              "transition focus:outline-none focus:ring-2 focus:ring-white/40",
+              "transition focus:outline-none focus:ring-2 focus:ring-foreground/40",
               current === activeSlides.length - 1
                 ? "opacity-50 cursor-not-allowed"
                 : "",

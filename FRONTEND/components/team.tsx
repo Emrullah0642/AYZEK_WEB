@@ -7,6 +7,8 @@ import { Separator } from "@/components/ui/separator"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Users, Linkedin } from "lucide-react"
 import { API_BASE } from "@/lib/api"
+import { ScrollAnimation } from "@/components/scroll-animations"
+import { TiltCard } from "@/components/tilt-card"
 
 // --- YENİ EKLENEN KISIMLAR ---
 
@@ -60,8 +62,8 @@ function TeamCapsuleCard({ team, palette }: { team: Team; palette: { ring: strin
           "group relative overflow-hidden rounded-[2rem] md:rounded-[2.5rem]",
           "w-full h-[240px] sm:h-[280px] md:h-[340px]",
           "bg-card/70 backdrop-blur supports-[backdrop-filter]:bg-card/60",
-          "border border-white/15",
-          "ring-1 ring-white/10",
+          "border border-foreground/15",
+          "ring-1 ring-foreground/10",
           "hover:shadow-xl transition-shadow",
           "flex flex-col items-center justify-center p-4 sm:p-5 md:p-6",
         ].join(" ")}
@@ -90,11 +92,11 @@ function TeamCapsuleCard({ team, palette }: { team: Team; palette: { ring: strin
 
         <div className="relative z-10 mt-2 sm:mt-3 md:mt-4 w-full px-2 sm:px-3 text-center">
           {team.about ? (
-            <p className="text-[10px] sm:text-xs md:text-sm text-white/75 leading-tight line-clamp-3 break-words min-h-[3.6em]">
+            <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground leading-tight line-clamp-3 break-words min-h-[3.6em]">
               {team.about}
             </p>
           ) : (
-            <p className="text-[10px] sm:text-xs md:text-sm text-white/60 line-clamp-3 break-words min-h-[3.6em]">&nbsp;</p>
+            <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground/60 line-clamp-3 break-words min-h-[3.6em]">&nbsp;</p>
           )}
         </div>
 
@@ -110,13 +112,13 @@ function TeamCapsuleCard({ team, palette }: { team: Team; palette: { ring: strin
           className={[
             "fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 max-w-xl w-[94vw] sm:w-[92vw] md:w-full overflow-hidden",
             "bg-card/70 backdrop-blur supports-[backdrop-filter]:bg-card/60",
-            "border border-white/15 ring-1 ring-white/10",
-            "text-white",
-            "[&>button]:text-white [&>button]:hover:bg-white/10",
+            "border border-foreground/15 ring-1 ring-foreground/10",
+            "text-foreground",
+            "[&>button]:text-foreground [&>button]:hover:bg-foreground/10",
           ].join(" ")}
         >
           <div className="pointer-events-none absolute inset-0">
-            <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-black/30" />
+            <div className="absolute inset-0 bg-gradient-to-b from-foreground/5 via-transparent to-transparent" />
             <div className={`absolute inset-0 bg-gradient-to-br ${palette.ring} opacity-25`} />
           </div>
           <div className="z-10">
@@ -129,7 +131,7 @@ function TeamCapsuleCard({ team, palette }: { team: Team; palette: { ring: strin
             </DialogHeader>
             <div className="space-y-3 sm:space-y-4">
               {team.about && (
-                <p className="text-xs sm:text-sm leading-relaxed text-white/85 break-words whitespace-pre-wrap">{team.about}</p>
+                <p className="text-xs sm:text-sm leading-relaxed text-foreground/85 break-words whitespace-pre-wrap">{team.about}</p>
               )}
               {team.categories?.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 sm:gap-2">
@@ -142,7 +144,7 @@ function TeamCapsuleCard({ team, palette }: { team: Team; palette: { ring: strin
               )}
               <div className="space-y-1.5 sm:space-y-2">
                 {team.members.map((m) => (
-                  <div key={m.id} className="flex items-center justify-between rounded-md border border-white/10 bg-white/10 backdrop-blur px-2 sm:px-3 py-1.5 sm:py-2">
+                  <div key={m.id} className="flex items-center justify-between rounded-md border border-foreground/10 bg-foreground/5 backdrop-blur px-2 sm:px-3 py-1.5 sm:py-2">
                     <div>
                       <div className="text-xs sm:text-sm font-medium leading-tight">{m.name}</div>
                       {m.role && <div className="text-[10px] sm:text-xs text-muted-foreground">{m.role}</div>}
@@ -176,7 +178,11 @@ function TeamsPuzzleGrid({ items }: { items: Team[] }) {
     <div className="mx-auto max-w-7xl px-2 sm:px-3">
       <div className="grid gap-3 sm:gap-4 md:gap-5 lg:gap-6 grid-cols-2 lg:grid-cols-4">
         {items.map((t, i) => (
-          <TeamCapsuleCard key={t.id} team={t} palette={PALETTE[i % PALETTE.length]} />
+          <ScrollAnimation key={t.id} animation="scale-up" delay={(i % 8) * 80}>
+            <TiltCard maxTilt={6}>
+              <TeamCapsuleCard team={t} palette={PALETTE[i % PALETTE.length]} />
+            </TiltCard>
+          </ScrollAnimation>
         ))}
       </div>
     </div>
@@ -229,7 +235,7 @@ export function TeamExplorer() {
   }
 
   if (error) {
-    return <div className="text-center p-10 text-red-500">Hata: {error}</div>
+    return <div className="text-center p-10 text-destructive">Hata: {error}</div>
   }
 
   return (

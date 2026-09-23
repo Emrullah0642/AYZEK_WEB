@@ -1,12 +1,29 @@
 
 import type React from "react"
 import type { Metadata } from "next"
+import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google"
+import { GeistSans } from "geist/font/sans"
 import "./globals.css"
 import { AdminProvider } from "@/contexts/admin-context"
 import { ThemeProvider } from "@/components/theme-provider"
 import AnimatedBg from "@/components/ui/animated-bg"
+import { SplashScreen } from "@/components/splash-screen"
 import { NotificationsProvider } from "@/contexts/notifications"
 import { GoogleTagManager } from '@next/third-parties/google'
+
+const displayFont = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
+  variable: "--font-space-grotesk",
+  display: "swap",
+})
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-jetbrains-mono",
+  display: "swap",
+})
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://ayzek.tr'), // Domain bağlanınca burası güncellenmeli
@@ -15,7 +32,7 @@ export const metadata: Metadata = {
     template: "%s | AYZEK"
   },
   description: "Topluluk başarılarını sergileyen, etkinlikleri ölümsüzleştiren ve üyeleri bir araya getiren modern topluluk platformu.",
-  keywords: ["Ayzek", "Topluluk", "Etkinlik", "Yazılım", "Teknoloji", "Blog", "Takım"],
+  keywords: ["Ayzek", "Topluluk", "Etkinlik", "Yazılım", "Teknoloji", "Takım"],
   authors: [{ name: "Ayzek Team" }],
   creator: "Ayzek",
   openGraph: {
@@ -58,20 +75,24 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="tr" className="dark" suppressHydrationWarning>
+    <html
+      lang="tr"
+      className={`${GeistSans.variable} ${displayFont.variable} ${jetbrainsMono.variable}`}
+      suppressHydrationWarning
+    >
       <head />
       {/* overflow-x-clip = sağdaki hayalet boşlukları keser */}
       <body className="antialiased font-sans min-h-dvh bg-background text-foreground overflow-x-clip">
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
-          forcedTheme="dark"
           enableSystem={false}
           enableColorScheme
           disableTransitionOnChange
         >
           {/* Global hareketli arka plan */}
           <AnimatedBg />
+          <SplashScreen />
           <NotificationsProvider>
             <AdminProvider>
               {children}

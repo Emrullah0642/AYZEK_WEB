@@ -1,10 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Image from "next/image"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { motion, useScroll, useSpring } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { useAdmin } from "@/contexts/admin-context"
-import { LayoutDashboard, Menu } from "lucide-react"
+import { LayoutDashboard, Menu, ArrowRight } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -13,72 +16,135 @@ import {
   DropdownMenuSeparator,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
+import { cn } from "@/lib/utils"
+import { ThemeToggle } from "@/components/theme-toggle"
+
+// Tek sayfa: tüm bölümler anasayfada, navbar oraya kaydırıyor. Sadece "Topluluğa Katıl" ayrı bir sayfa (/join).
+const links = [
+  { href: "/", label: "Ana Sayfa" },
+  { href: "/#hakkimizda", label: "Hakkımızda" },
+  { href: "/#etkinlikler", label: "Etkinlikler" },
+  { href: "/#ekip", label: "Takımlarımız" },
+]
 
 export function AdminNavbar() {
   const { isAdminLoggedIn } = useAdmin()
   const [open, setOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+  const pathname = usePathname()
 
-  const links = [
-    { href: "/", label: "Ana Sayfa" },
-    { href: "/about", label: "Hakkımızda" },
-    { href: "/events", label: "Etkinlikler" },
-    { href: "/teams", label: "Takımlarımız" },
-    { href: "/blog", label: "Bloglar" },
-    { href: "/join", label: "Topluluğa Katıl" },
-  ]
+  const isActive = (href: string) => (href === "/" ? pathname === "/" && typeof window !== "undefined" && !window.location.hash : false)
+
+  const { scrollYProgress } = useScroll()
+  const progressX = useSpring(scrollYProgress, { stiffness: 200, damping: 30, restDelta: 0.001 })
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24)
+    onScroll()
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [])
 
   return (
     <>
-      <header className="fixed top-0 left-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 theme-transition">
-        <div className="container mx-auto flex h-15 md:h-16 max-w-screen-xl items-center justify-between px-3 sm:px-4 md:px-6">
+      <header
+        className={cn(
+          "fixed top-0 left-0 z-50 w-full border-b transition-[background-color,backdrop-filter,box-shadow] duration-300",
+          scrolled
+            ? "bg-[#2563EB]/70 backdrop-blur-md border-white/10 shadow-[0_4px_20px_-8px_rgba(0,0,0,0.4)]"
+            : "bg-[#2563EB] border-black/10"
+        )}
+      >
+        <motion.div
+          className="absolute inset-x-0 top-0 h-[2px] bg-ayzek-gradient origin-left z-10"
+          style={{ scaleX: progressX }}
+        />
+        <div
+          className={cn(
+            "container mx-auto flex max-w-screen-xl items-center justify-between px-3 sm:px-4 md:px-6 transition-[height] duration-300",
+            scrolled ? "h-12 md:h-14" : "h-14 md:h-16"
+          )}
+        >
           {/* Sol: Logo */}
           <div className="flex items-center gap-1.5 md:gap-2 min-w-0 flex-shrink-0">
-            <a href="/" className="flex items-center space-x-1.5 md:space-x-2">
-              <div className="relative w-7 h-7 md:w-8 md:h-8">
+            <Link href="/" className="flex items-center space-x-2 group">
+              <div
+                className={cn(
+                  "relative rounded-full ring-1 ring-white/20 group-hover:ring-white/40 transition-all overflow-hidden",
+                  scrolled ? "w-6 h-6 md:w-7 md:h-7" : "w-7 h-7 md:w-8 md:h-8"
+                )}
+              >
                 <Image src="/ayzek-logo.png" alt="AYZEK" fill className="object-contain" priority />
               </div>
-              <span className="text-xl md:text-2xl font-display font-bold text-primary whitespace-nowrap">AYZEK</span>
-            </a>
+              <span className="text-lg md:text-xl font-display font-bold tracking-tight text-white whitespace-nowrap">
+                AYZEK
+              </span>
+            </Link>
           </div>
 
-          {/* Orta: Masaüstü menü (aynı kaldı) */}
-          <nav className="hidden md:flex items-center justify-center space-x-4 lg:space-x-6 text-sm font-medium">
-            <a href="/" className="transition-all duration-300 hover:text-primary hover:scale-105 focus-ring rounded-sm px-2 py-1 whitespace-nowrap">Ana Sayfa</a>
-            <a href="/about" className="transition-all duration-300 hover:text-primary hover:scale-105 focus-ring rounded-sm px-2 py-1 whitespace-nowrap">Hakkımızda</a>
-            <a href="/events" className="transition-all duration-300 hover:text-primary hover:scale-105 focus-ring rounded-sm px-2 py-1 whitespace-nowrap">Etkinlikler</a>
-            <a href="/teams" className="transition-all duration-300 hover:text-primary hover:scale-105 focus-ring rounded-sm px-2 py-1 whitespace-nowrap">Takımlarımız</a>
-            <a href="/blog" className="transition-all duration-300 hover:text-primary hover:scale-105 focus-ring rounded-sm px-2 py-1 whitespace-nowrap">Bloglar</a>
-            <a href="/join" className="transition-all duration-300 hover:text-primary hover:scale-105 focus-ring rounded-sm px-2 py-1 whitespace-nowrap">Topluluğa Katıl</a>
+          {/* Orta: Masaüstü menü */}
+          <nav className="hidden md:flex items-center gap-4 lg:gap-6 text-sm font-medium">
+            {links.map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                className={cn(
+                  "relative whitespace-nowrap py-1.5 transition-colors focus-ring",
+                  isActive(l.href)
+                    ? "text-white"
+                    : "text-white/60 hover:text-white"
+                )}
+              >
+                {l.label}
+                {isActive(l.href) && (
+                  <span className="absolute -bottom-[1px] left-0 right-0 h-[1.5px] bg-white" />
+                )}
+              </Link>
+            ))}
 
             {isAdminLoggedIn && (
               <>
-                <div className="h-4 w-px bg-border mx-2"></div>
-                <a
+                <div className="h-4 w-px bg-white/20" />
+                <Link
                   href="/admin"
-                  className="transition-colors hover:text-primary focus-ring rounded-sm px-2 py-1 flex items-center gap-1 text-orange-500"
+                  className="flex items-center gap-1.5 text-white hover:text-white/80 transition-colors focus-ring"
                 >
                   <LayoutDashboard className="w-4 h-4" />
-                  Yönetici Paneli
-                </a>
+                  Panel
+                </Link>
               </>
             )}
           </nav>
 
           {/* Sağ: Aksiyonlar */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 md:gap-2">
+            <ThemeToggle className="w-9 h-9 rounded-lg text-white/70 hover:text-white hover:bg-white/10" />
+
+            <div className="hidden md:block h-5 w-px bg-white/20 mx-0.5" />
+
+            <Button
+              asChild
+              size="sm"
+              className="hidden md:inline-flex bg-ayzek-gradient hover:opacity-90 btn-hover-scale btn-sweep rounded-lg text-primary-foreground shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"
+            >
+              <Link href="/join">
+                Topluluğa Katıl
+                <ArrowRight className="w-3.5 h-3.5 ml-1" />
+              </Link>
+            </Button>
 
             {isAdminLoggedIn && (
               <Button
                 asChild
                 size="sm"
                 variant="ghost"
-                className="w-9 h-9 rounded-full p-0 hover:bg-primary/10 hidden md:inline-flex"
+                className="w-9 h-9 rounded-lg p-0 hover:bg-primary/10 hidden md:inline-flex text-primary"
                 title="Yönetici Paneli"
                 aria-label="Yönetici Paneli"
               >
-                <a href="/admin">
+                <Link href="/admin">
                   <LayoutDashboard className="w-4 h-4" />
-                </a>
+                </Link>
               </Button>
             )}
 
@@ -88,7 +154,7 @@ export function AdminNavbar() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="w-9 h-9 rounded-full md:hidden"
+                  className="w-9 h-9 rounded-lg md:hidden text-white hover:text-white hover:bg-white/10"
                   aria-label="Menüyü aç"
                   title="Menü"
                 >
@@ -96,12 +162,11 @@ export function AdminNavbar() {
                 </Button>
               </DropdownMenuTrigger>
 
-              {/* Küçük pop-up, sağa hizalı */}
               <DropdownMenuContent
                 align="end"
                 side="bottom"
                 sideOffset={8}
-                className="w-60 p-2 rounded-xl shadow-lg"
+                className="w-64 p-2 rounded-2xl shadow-xl"
               >
                 <DropdownMenuLabel className="px-2 py-1.5">Menü</DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -110,27 +175,35 @@ export function AdminNavbar() {
                   <DropdownMenuItem
                     key={l.href}
                     onClick={() => setOpen(false)}
-                    className="px-2 py-2 cursor-pointer"
+                    className={cn("px-2 py-2 cursor-pointer rounded-lg", isActive(l.href) && "bg-foreground/5")}
                     asChild
                   >
-                    <a href={l.href} className="font-medium">
+                    <Link href={l.href} className="font-medium">
                       {l.label}
-                    </a>
+                    </Link>
                   </DropdownMenuItem>
                 ))}
+
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setOpen(false)} className="px-2 py-2 cursor-pointer rounded-lg" asChild>
+                  <Link href="/join" className="font-medium flex items-center gap-2 text-primary">
+                    Topluluğa Katıl
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </DropdownMenuItem>
 
                 {isAdminLoggedIn && (
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={() => setOpen(false)}
-                      className="px-2 py-2 cursor-pointer text-orange-500"
+                      className="px-2 py-2 cursor-pointer rounded-lg text-primary"
                       asChild
                     >
-                      <a href="/admin" className="flex items-center gap-2">
+                      <Link href="/admin" className="flex items-center gap-2">
                         <LayoutDashboard className="w-4 h-4" />
                         Yönetici Paneli
-                      </a>
+                      </Link>
                     </DropdownMenuItem>
                   </>
                 )}

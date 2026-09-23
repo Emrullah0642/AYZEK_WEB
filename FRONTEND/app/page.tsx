@@ -9,16 +9,32 @@ import { ScrollAnimation } from "@/components/scroll-animations";
 import { ParallaxSection } from "@/components/parallax-section";
 import { HorizontalTimeline } from "@/components/horizontal-timeline";
 import EventGallery from "@/components/event-gallery";
+import { EventsCalendar, type Event } from "@/components/events-calendar";
+import { TeamExplorer } from "@/components/team";
+import { MissionValues } from "@/components/mission-values";
+import { CommunityJourney } from "@/components/community-journey";
 import { AdminNavbar } from "@/components/navbar";
 import { InlineEditWrapper } from "@/components/admin/admin-inline-edit-wrapper";
 import { ContentEditModal } from "@/components/content-edit-modal";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Calendar, Heart, Rocket, ArrowRight, Eye, MapPin, ExternalLink } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Users, Calendar, Rocket, ArrowRight, Clock, Send } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { EventCardSkeleton, TeamCardSkeleton } from "@/components/skeleton-loaders";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { CountUp } from "@/components/count-up";
+import { KineticHeading } from "@/components/kinetic-heading";
+import { MagneticButton } from "@/components/magnetic-button";
+import { SiteFooter } from "@/components/site-footer";
+import { toast } from "sonner";
 
 // --- YENİ EKLENEN KISIMLAR ---
 
@@ -45,110 +61,104 @@ function normalizeImageUrl(v: string | null | undefined) {
 }
 // -----------------------------
 
-// Takım verisi için net bir tip tanımı
-interface FeaturedTeam {
-  id: number;
-  name: string;
-  code: string;
-  logoUrl?: string;
-  description?: string;
-}
-
 export default function HomePage() {
   const [editingSection, setEditingSection] = useState<string | null>(null);
 
-  // Etkinlikler için state'ler
-  const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  // Etkinlikler (events sayfasından taşındı) — tüm etkinlikler, takvim + galeri burada
+  const [events, setEvents] = useState<Event[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
+  const [eventsError, setEventsError] = useState<any>(null);
 
-  // Öne çıkan takımlar için state'ler
-  const [featuredTeams, setFeaturedTeams] = useState<FeaturedTeam[]>([]);
-  const [teamsLoading, setTeamsLoading] = useState(true);
-  const [teamsError, setTeamsError] = useState<any>(null);
+  const [isEventSuggestOpen, setIsEventSuggestOpen] = useState(false);
+  const [eventSuggestForm, setEventSuggestForm] = useState({ title: "", description: "", contact: "" });
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<any>(null);
-
-  // Saat -> "23.30" formatı
-  const formatTime = (value: string) => {
-    const d = new Date(value);
-    if (!Number.isNaN(d.getTime())) {
-      return d
-        .toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit", hour12: false })
-        .replace(":", ".");
-    }
-    const m = String(value).match(/^(\d{1,2}):(\d{2})/);
-    if (m) return `${m[1]}.${m[2]}`;
-    return String(value);
-  };
-
-  // Etkinlikleri çeken useEffect
+  // Hero'daki yörüngedeki üye fotoğrafları — hata olursa sessizce boş kalır, ikon placeholder gösterilir
+  const [heroMembers, setHeroMembers] = useState<{ id: number; name: string; photoUrl: string }[]>([]);
   useEffect(() => {
-    const fetchUpcomingEvents = async () => {
+    const fetchHeroMembers = async () => {
       try {
-        setLoading(true);
-        const response = await axios.get(`${API_BASE}/events/upcoming`);
-        // En yakın tarihten uzağa doğru sırala
-        const sortedEvents = response.data.sort((a: any, b: any) => new Date(a.start_at).getTime() - new Date(b.start_at).getTime());
-        setUpcomingEvents(sortedEvents);
-      } catch (err: any) {
-        setError(err);
-        console.error("Etkinlikler çekilirken bir hata oluştu:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUpcomingEvents();
-  }, []);
-
-  // Öne çıkan takımları çeken useEffect
-  useEffect(() => {
-    const fetchFeaturedTeams = async () => {
-      try {
-        setTeamsLoading(true);
         const response = await axios.get(`${API_BASE}/teams/featured`);
-
-        const formattedTeams: FeaturedTeam[] = response.data.map((team: any) => ({
+        const formatted = response.data.slice(0, 4).map((team: any) => ({
           id: team.id,
           name: team.name,
-          // --- DÜZELTME BURADA ---
-          logoUrl: normalizeImageUrl(team.photo_url),
-          description: team.description,
-          code: team.name.toUpperCase(),
+          photoUrl: normalizeImageUrl(team.photo_url),
         }));
-
-        setFeaturedTeams(formattedTeams);
-
-      } catch (err: any) {
-        setTeamsError(err);
-        console.error("Öne çıkan takımlar çekilirken bir hata oluştu:", err);
-      } finally {
-        setTeamsLoading(false);
+        setHeroMembers(formatted);
+      } catch {
+        setHeroMembers([]);
       }
     };
-    fetchFeaturedTeams();
+    fetchHeroMembers();
   }, []);
+
+  useEffect(() => {
+    const fetchAllEvents = async () => {
+      try {
+        setEventsLoading(true);
+        const response = await axios.get(`${API_BASE}/events`);
+        response.data.sort((a: any, b: any) => b.id - a.id);
+        const formatted: Event[] = response.data.map((event: any) => ({
+          id: event.id,
+          title: event.title,
+          description: event.description,
+          type: event.category,
+          date: event.start_at,
+          time: event.start_at,
+          duration: "3 saat",
+          location: event.location,
+          image: normalizeImageUrl(event.cover_image_url || event.image_url),
+          maxAttendees: event.capacity,
+          registrationLink: event.whatsapp_link,
+          tags: event.tags ? (typeof event.tags === "string" ? event.tags.split(",") : event.tags) : [],
+        }));
+        setEvents(formatted);
+      } catch (err: any) {
+        setEventsError(err);
+        console.error("Etkinlikler çekilirken bir hata oluştu:", err);
+      } finally {
+        setEventsLoading(false);
+      }
+    };
+    fetchAllEvents();
+  }, []);
+
+  const handleEventSuggestSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await axios.post(`${API_BASE}/event-suggestions`, eventSuggestForm);
+      setIsEventSuggestOpen(false);
+      setEventSuggestForm({ title: "", description: "", contact: "" });
+      toast.success("Etkinlik öneriniz başarıyla gönderildi!");
+    } catch (err) {
+      console.error("Event suggestion submission failed:", err);
+      toast.error("Etkinlik önerisi gönderilirken bir hata oluştu.");
+    }
+  };
 
   // Statik veriler
   const [stats, setStats] = useState([
-    { value: "150+", label: "Topluluk Üyesi", color: "bg-gradient-to-r from-blue-600 to-blue-500" },
-    { value: "25+", label: "Düzenlenen Etkinlik", color: "bg-gradient-to-r from-blue-500 to-cyan-500" },
-    { value: "10+", label: "Tamamlanan Proje", color: "bg-gradient-to-r from-cyan-500 to-cyan-400" },
-    { value: "3", label: "Yıl Aktif", color: "bg-gradient-to-r from-blue-700 to-cyan-600" },
+    { value: "150+", label: "Topluluk Üyesi", icon: Users },
+    { value: "25+", label: "Düzenlenen Etkinlik", icon: Calendar },
+    { value: "10+", label: "Tamamlanan Proje", icon: Rocket },
+    { value: "3", label: "Yıl Aktif", icon: Clock },
   ]);
   const [aboutPreview, setAboutPreview] = useState({
     title: "Hakkımızda",
     description: "AYZEK, teknoloji tutkunu bireylerden oluşan bir topluluktur. Birlikte öğrenir, gelişir ve geleceği şekillendiririz.",
   });
 
-  const PALETTE = [
-    { ring: "from-emerald-400 to-green-600", glow: "shadow-emerald-500/30" },
-    { ring: "from-sky-400 to-blue-600", glow: "shadow-sky-500/30" },
-    { ring: "from-fuchsia-400 to-violet-600", glow: "shadow-fuchsia-500/30" },
-    { ring: "from-amber-400 to-orange-600", glow: "shadow-amber-500/30" },
-    { ring: "from-rose-400 to-pink-600", glow: "shadow-rose-500/30" },
-  ];
+  // Hero arka plan glow'ları için hafif mouse parallax — birkaç piksel, abartısız
+  const handleHeroParallax = (e: React.MouseEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    e.currentTarget.style.setProperty("--mx", `${x * 16}px`);
+    e.currentTarget.style.setProperty("--my", `${y * 16}px`);
+  };
+  const handleHeroParallaxReset = (e: React.MouseEvent<HTMLElement>) => {
+    e.currentTarget.style.setProperty("--mx", "0px");
+    e.currentTarget.style.setProperty("--my", "0px");
+  };
 
   // Handler fonksiyonları
   const handleEditStats = () => setEditingSection("stats");
@@ -161,18 +171,132 @@ export default function HomePage() {
     }
     setEditingSection(null);
   };
-  const handleEventClick = (event: any) => {
-    setSelectedEvent(event);
-    setIsModalOpen(true);
-  };
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedEvent(null);
-  };
 
   return (
     <div className="min-h-screen bg-transparent relative z-10 theme-transition overflow-x-hidden">
       <AdminNavbar />
+
+      {/* HERO — sol metin, sağda yörüngeli logo paneli */}
+      <section
+        className="relative px-4 pt-16 sm:pt-20 md:pt-24 pb-14 sm:pb-20 overflow-hidden"
+        onMouseMove={handleHeroParallax}
+        onMouseLeave={handleHeroParallaxReset}
+      >
+        {/* Ambiyans glow — yalnızca hero'ya özel, blur burada bilinçli ve tek seferlik kullanılıyor. Mouse ile birkaç piksel kayar (hafif parallax). */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 w-[110vw] max-w-[900px] h-[560px] opacity-90 transition-transform duration-500 ease-out"
+          style={{
+            background: "radial-gradient(ellipse 50% 55% at 50% 30%, rgba(37,99,235,0.16), transparent 70%)",
+            transform: "translate(var(--mx, 0px), var(--my, 0px))",
+          }}
+        />
+        <div
+          className="dark:block hidden pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 w-[110vw] max-w-[1000px] h-[620px] transition-transform duration-500 ease-out"
+          aria-hidden="true"
+          style={{
+            background: "radial-gradient(ellipse 45% 55% at 50% 25%, rgba(34,211,238,0.22), transparent 70%)",
+            transform: "translate(calc(var(--mx, 0px) * -1), calc(var(--my, 0px) * -1))",
+          }}
+        />
+
+        <div className="container max-w-screen-xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-12 lg:gap-8 items-center">
+            {/* Sol: metin */}
+            <div className="relative flex flex-col items-center text-center lg:items-start lg:text-left">
+              <KineticHeading
+                className="font-display font-bold tracking-tight text-4xl sm:text-6xl md:text-7xl leading-[1.05] max-w-2xl text-foreground dark:drop-shadow-[0_0_40px_rgba(34,211,238,0.25)]"
+                words={[
+                  { text: "Teknolojiyi" },
+                  { text: "birlikte" },
+                  { text: "öğreniyor," },
+                  { text: "üretiyoruz.", breakBefore: true },
+                ]}
+              />
+
+              <p className="text-muted-foreground max-w-xl text-base sm:text-lg leading-relaxed mt-5 sm:mt-6">
+                AYZEK; hackathonlardan açık kaynağa, atölyelerden networking etkinliklerine kadar
+                teknoloji tutkunlarını bir araya getiren, Selçuk Üniversitesi teknoloji topluluğu.
+                Birlikte öğreniyor, birlikte üretiyor, birlikte büyüyoruz.
+              </p>
+
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 mt-7 sm:mt-8">
+                <MagneticButton>
+                  <Button asChild size="lg" className="rounded-full bg-ayzek-gradient hover:opacity-90 btn-hover-scale btn-sweep text-primary-foreground px-7 shadow-[0_0_30px_-6px_rgba(37,99,235,0.55)]">
+                    <Link href="/join">
+                      Topluluğa katıl
+                      <ArrowRight className="w-4 h-4 ml-1.5" />
+                    </Link>
+                  </Button>
+                </MagneticButton>
+                <Button asChild size="lg" variant="outline" className="rounded-full border-foreground/20 text-foreground hover:bg-foreground/[0.06] px-6">
+                  <Link href="/events">Etkinlikleri gör</Link>
+                </Button>
+              </div>
+            </div>
+
+            {/* Sağ: logo, ışıklı kaide ve yörüngede dönen üye fotoğrafları */}
+            <div className="relative w-full h-[300px] sm:h-[360px] lg:h-[440px]">
+              {/* eş merkezli halkalar */}
+              <div className="absolute inset-[6%] rounded-full border border-primary/10" />
+              <div className="absolute inset-[16%] rounded-full border border-primary/15" />
+              <div className="absolute inset-[26%] rounded-full border border-primary/10" />
+
+              {/* ışıklı kaide */}
+              <div className="absolute left-1/2 bottom-[14%] -translate-x-1/2 w-52 sm:w-60 h-14 rounded-[50%] bg-primary/30 blur-2xl" />
+              <div className="absolute left-1/2 bottom-[16%] -translate-x-1/2 w-40 sm:w-48 h-8 rounded-[50%] bg-gradient-to-b from-primary/70 to-accent/50 border border-primary/40" />
+
+              {/* logo — kaidenin üzerinde hafifçe yüzüyor */}
+              <div className="absolute left-1/2 top-[38%] -translate-x-1/2 -translate-y-1/2 animate-float">
+                <div className="relative w-36 h-36 sm:w-44 sm:h-44 lg:w-48 lg:h-48">
+                  <Image src="/ayzek-logo.png" alt="AYZEK" fill priority className="object-contain dark:drop-shadow-[0_0_45px_rgba(34,211,238,0.55)]" />
+                </div>
+              </div>
+
+              {/* yörüngedeki üye fotoğrafları */}
+              {heroMembers.map((m, i) => {
+                const pos = [
+                  "left-[4%] top-[8%]",
+                  "right-[2%] top-[14%]",
+                  "left-[0%] bottom-[8%]",
+                  "right-[6%] bottom-[2%]",
+                ][i];
+                return (
+                  <div
+                    key={m.id}
+                    className={`absolute ${pos} animate-float`}
+                    style={{ animationDelay: `${i * 0.45}s` }}
+                  >
+                    <div className="relative size-12 sm:size-14 rounded-full ring-2 ring-primary/40 bg-card overflow-hidden shadow-[0_0_20px_-6px_rgba(34,211,238,0.45)]">
+                      {m.photoUrl ? (
+                        <Image src={m.photoUrl} alt={m.name} fill className="object-cover" quality={60} />
+                      ) : (
+                        <div className="w-full h-full grid place-items-center">
+                          <Users className="w-5 h-5 text-primary/70" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* İstatistikler — ortalanmış, ayraçsız */}
+          <ScrollAnimation animation="fade-in" delay={150} className="relative flex flex-wrap items-start justify-center gap-x-10 gap-y-6 sm:gap-x-16 mt-14 sm:mt-16">
+            {stats.map((s, i) => (
+              <div key={i} className="flex flex-col items-center">
+                <div className="font-display font-bold text-3xl sm:text-4xl text-primary leading-none">
+                  <CountUp value={s.value} />
+                </div>
+                <div className="text-[10px] sm:text-[11px] font-medium tracking-wide text-muted-foreground mt-2 uppercase">
+                  {s.label}
+                </div>
+              </div>
+            ))}
+          </ScrollAnimation>
+        </div>
+      </section>
 
       <InlineEditWrapper className="relative py-3 sm:py-4 md:py-5 px-0 sm:px-4">
         <div className="container max-w-screen-xl mx-auto px-2 sm:px-4 md:px-0">
@@ -182,290 +306,220 @@ export default function HomePage() {
         </div>
       </InlineEditWrapper>
 
-      {/* HAKKıMıZDA - Poster'ın hemen altında */}
-      <InlineEditWrapper onEdit={handleEditAbout} className="py-4 sm:py-6 md:py-10 px-3 sm:px-4">
-        <div className="container max-w-screen-xl mx-auto">
-          <ScrollAnimation animation="fade-up" className="text-center mb-3 sm:mb-4 md:mb-6">
-            <h2 className="text-base sm:text-lg md:text-2xl lg:text-3xl font-display font-bold mb-1.5 sm:mb-2 gradient-text">{aboutPreview.title}</h2>
-            <p className="text-muted-foreground max-w-3xl mx-auto text-[10px] sm:text-xs md:text-sm lg:text-base leading-snug px-2">{aboutPreview.description}</p>
-          </ScrollAnimation>
-          <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-5">
-            <ScrollAnimation animation="slide-in-left" delay={0}>
-              <Card className="hover-lift bg-black/80 backdrop-blur-sm border border-white/10 h-[160px] sm:h-[200px] md:h-[240px] flex flex-col transition-all duration-300">
-                <CardHeader className="text-center flex-shrink-0 p-2 sm:p-3 md:p-4">
-                  <Users className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-primary mx-auto mb-1 sm:mb-1.5" />
-                  <CardTitle className="text-[10px] sm:text-sm md:text-base lg:text-lg leading-tight mb-0">Misyonumuz</CardTitle>
-                </CardHeader>
-                <CardContent className="flex-grow flex items-center justify-center p-1.5 sm:p-2 md:p-3 pt-0">
-                  <CardDescription className="text-center text-[8px] sm:text-xs md:text-sm leading-tight line-clamp-3 sm:line-clamp-4">
-                    Teknoloji çağında birlikte öğrenip gelişmek için bir araya gelmiş bir topluluğuz.
-                  </CardDescription>
-                </CardContent>
-              </Card>
+      {/* ============ HAKKIMIZDA ============ */}
+      <section id="hakkimizda" className="scroll-mt-header">
+        <InlineEditWrapper onEdit={handleEditAbout} className="section-band py-10 sm:py-14 md:py-18 px-3 sm:px-4">
+          <div className="container max-w-screen-xl mx-auto">
+            <ScrollAnimation animation="fade-up" className="max-w-3xl mb-8 sm:mb-10">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold text-foreground mb-4">{aboutPreview.title}</h2>
+              <p className="text-muted-foreground text-base sm:text-lg leading-relaxed">
+                {aboutPreview.description || "AYZEK, Selçuk Üniversitesi'nde teknolojiye meraklı öğrencileri bir araya getiren bir topluluk."}
+              </p>
+              <p className="text-muted-foreground text-base sm:text-lg leading-relaxed mt-4">
+                Hackathonlardan açık kaynağa, atölyelerden networking etkinliklerine kadar birlikte
+                öğreniyor, birlikte üretiyoruz. Herkesin fikrini özgürce paylaşabildiği, birbirinden
+                öğrenmenin normalleştiği bir ortam kuruyoruz — deneyim seviyesi fark etmeksizin.
+              </p>
             </ScrollAnimation>
-            <ScrollAnimation animation="scale-up" delay={100}>
-              <Card className="hover-lift bg-black/80 backdrop-blur-sm border border-white/10 h-[160px] sm:h-[200px] md:h-[240px] flex flex-col transition-all duration-300">
-                <CardHeader className="text-center flex-shrink-0 p-2 sm:p-3 md:p-4">
-                  <Heart className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-primary mx-auto mb-1 sm:mb-1.5" />
-                  <CardTitle className="text-[10px] sm:text-sm md:text-base lg:text-lg leading-tight mb-0">Değerlerimiz</CardTitle>
-                </CardHeader>
-                <CardContent className="flex-grow flex items-center justify-center p-1.5 sm:p-2 md:p-3 pt-0">
-                  <CardDescription className="text-center text-[8px] sm:text-xs md:text-sm leading-tight line-clamp-3 sm:line-clamp-4">
-                    Bu değerler bizi birbirimize güçlü şekilde bağayarak başarılar inşa etmemizi sağlıyor.
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            </ScrollAnimation>
-            <ScrollAnimation animation="slide-in-right" delay={200}>
-              <Card className="hover-lift bg-black/80 backdrop-blur-sm border border-white/10 h-[160px] sm:h-[200px] md:h-[240px] flex flex-col transition-all duration-300">
-                <CardHeader className="text-center flex-shrink-0 p-2 sm:p-3 md:p-4">
-                  <Rocket className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-primary mx-auto mb-1 sm:mb-1.5" />
-                  <CardTitle className="text-[10px] sm:text-sm md:text-base lg:text-lg leading-tight mb-0">Başarılarımız</CardTitle>
-                </CardHeader>
-                <CardContent className="flex-grow flex items-center justify-center p-1.5 sm:p-2 md:p-3 pt-0">
-                  <CardDescription className="text-center text-[8px] sm:text-xs md:text-sm leading-tight line-clamp-3 sm:line-clamp-4">
-                    Hackathon zaferleri, açık kaynak projeleri ve topluluk etkinlikleriyle gurur duyuyoruz.
-                  </CardDescription>
-                </CardContent>
-              </Card>
+            <ScrollAnimation animation="fade-up" delay={150}>
+              <MissionValues />
             </ScrollAnimation>
           </div>
-          <ScrollAnimation animation="scale-up" delay={300}>
-            <div className="text-center mt-3 sm:mt-4">
-              <Button asChild className="bg-ayzek-gradient hover:opacity-90 btn-hover-scale btn-shimmer text-[10px] sm:text-xs md:text-sm h-8 sm:h-9 md:h-10 px-3 sm:px-4 md:px-5">
-                <a href="/about">
-                  <Eye className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1 sm:mr-1.5" />
-                  Detayları Gör
-                  <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 ml-1 sm:ml-1.5" />
-                </a>
-              </Button>
-            </div>
-          </ScrollAnimation>
-        </div>
-      </InlineEditWrapper>
+        </InlineEditWrapper>
 
-      {/* ZAMAN KAPSÜLÜ - Hakkımızda'nın altında */}
-      <InlineEditWrapper>
-        <ParallaxSection className="py-6 sm:py-8 md:py-12 px-3 sm:px-4" speed={0.3}>
+        <InlineEditWrapper>
+          <ParallaxSection className="py-6 sm:py-8 md:py-12 px-3 sm:px-4" speed={0.3}>
+            <div className="container max-w-screen-xl mx-auto">
+              <ScrollAnimation animation="fade-up" className="text-center mb-6 sm:mb-8">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold mb-2 text-foreground">Zaman kapsülü</h2>
+                <p className="text-muted-foreground max-w-3xl mx-auto text-xs sm:text-sm md:text-base leading-snug px-2">
+                  Topluluğumuzun yolculuğunu interaktif kilometre taşları, başarılar ve bugün kim olduğumuzu şekillendiren unutulmaz anlar aracılığıyla keşfedin.
+                </p>
+              </ScrollAnimation>
+              <ScrollAnimation animation="fade-up" delay={200}>
+                <div className="py-2 sm:py-4 md:py-6">
+                  <HorizontalTimeline />
+                </div>
+              </ScrollAnimation>
+            </div>
+          </ParallaxSection>
+        </InlineEditWrapper>
+
+        <InlineEditWrapper className="section-band py-10 sm:py-14 md:py-18 px-3 sm:px-4">
           <div className="container max-w-screen-xl mx-auto">
-            <ScrollAnimation animation="fade-up" className="text-center mb-4 sm:mb-5 md:mb-6">
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-2 gradient-text">Zaman Kapsülü</h2>
-              <p className="text-muted-foreground max-w-3xl mx-auto text-xs sm:text-sm md:text-base leading-snug px-2">
-                Topluluğumuzun yolculuğunu interaktif kilometre taşları, başarılar ve bugün kim olduğumuzu şekillendiren unutulmaz anlar aracılığıyla keşfedin.
+            <ScrollAnimation animation="fade-up">
+              <CommunityJourney />
+            </ScrollAnimation>
+          </div>
+        </InlineEditWrapper>
+      </section>
+
+      {/* ============ ETKİNLİKLER ============ */}
+      <section id="etkinlikler" className="scroll-mt-header">
+        <InlineEditWrapper className="py-10 sm:py-14 md:py-18 px-3 sm:px-4">
+          <div className="container max-w-screen-xl mx-auto">
+            <ScrollAnimation animation="fade-up" className="text-center mb-6 sm:mb-8">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold mb-2 text-foreground">Topluluk etkinlikleri</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto text-xs sm:text-sm md:text-base px-2 leading-snug">
+                Teknoloji topluluğumuzu ilham vermeye, eğitmeye ve birbirine bağlamaya yönelik tasarlanmış atölyeler,
+                buluşmalar, konferanslar ve hackathonları keşfedin. Geçmiş ve gelecek tüm etkinliklerimize göz atın, türe göre filtreleyin.
               </p>
             </ScrollAnimation>
             <ScrollAnimation animation="fade-up" delay={200}>
-              <div className="py-2 sm:py-4 md:py-6">
-                <HorizontalTimeline />
-              </div>
+              {eventsLoading ? (
+                <p className="text-center text-muted-foreground">Etkinlikler yükleniyor...</p>
+              ) : eventsError ? (
+                <p className="text-center text-destructive">Etkinlikler çekilirken bir hata oluştu.</p>
+              ) : events.length > 0 ? (
+                <EventsCalendar events={events} loading={eventsLoading} />
+              ) : (
+                <p className="text-center text-muted-foreground">Henüz etkinlik bulunmuyor.</p>
+              )}
             </ScrollAnimation>
           </div>
-        </ParallaxSection>
-      </InlineEditWrapper>
+        </InlineEditWrapper>
 
-      <InlineEditWrapper className="py-6 sm:py-8 md:py-12 px-3 sm:px-4 bg-transparent theme-transition">
-        <div className="container max-w-screen-xl mx-auto">
-          <ScrollAnimation animation="fade-up" className="text-center mb-4 sm:mb-5 md:mb-6">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-2 gradient-text">Yaklaşan Etkinlikler</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto text-xs sm:text-sm md:text-base px-2 leading-snug">
-              Teknoloji dünyasındaki en son gelişmeleri takip edin ve topluluğumuzla birlikte öğrenin.
-            </p>
-          </ScrollAnimation>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-5 mb-4 sm:mb-5">
-            {loading ? (
-              <>
-                <EventCardSkeleton />
-                <EventCardSkeleton />
-                <EventCardSkeleton />
-              </>
-            ) : error ? (
-              <p className="text-center text-red-500 w-full col-span-full text-sm">Etkinlikler çekilirken bir hata oluştu.</p>
-            ) : upcomingEvents.length > 0 ? (
-              upcomingEvents.slice(0, 3).map((event: any, index: number) => (
-                <ScrollAnimation key={index} animation="scale-up" delay={index * 100}>
-                  <Card
-                    className="hover-lift bg-black/80 backdrop-blur-sm border border-white/10 cursor-pointer transition-all duration-300 min-h-[160px] sm:min-h-[180px] md:min-h-[200px] flex flex-col"
-                    onClick={() => handleEventClick(event)}
-                  >
-                    <CardHeader className="p-3 sm:p-4 md:p-5 flex-shrink-0">
-                      <div className="flex items-center justify-between mb-1 sm:mb-1.5 gap-2">
-                        <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
-                        <span className="text-[10px] sm:text-xs text-muted-foreground text-right">
-                          {new Date(event.start_at).toLocaleDateString("tr-TR", { day: "2-digit", month: "long", year: "numeric" })} • {formatTime(event.start_at)}
-                        </span>
-                      </div>
-                      <CardTitle className="text-sm sm:text-base md:text-lg mb-0">{event.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex-grow p-3 sm:p-4 md:p-5 pt-0">
-                      <CardDescription className="text-xs sm:text-sm line-clamp-2 leading-snug break-words min-h-[2.5em]">{event.description}</CardDescription>
-                    </CardContent>
-                  </Card>
-                </ScrollAnimation>
-              ))
-            ) : (
-              <p className="text-center text-muted-foreground w-full col-span-full text-sm">Paylaşılan etkinlik yok.</p>
-            )}
+        <InlineEditWrapper className="section-band py-6 sm:py-8 md:py-12 px-3 sm:px-4">
+          <div className="container max-w-screen-xl mx-auto">
+            <ScrollAnimation animation="fade-up" className="text-center mb-6 sm:mb-8">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold mb-2 text-foreground">Etkinlik galerisi</h2>
+              <p className="text-muted-foreground max-w-xl mx-auto text-xs sm:text-sm md:text-base mt-1.5 leading-snug">
+                Geçmiş etkinliklerimizden kareler ve unutulmaz anlar.
+              </p>
+            </ScrollAnimation>
+            <ScrollAnimation animation="fade-up" delay={200}>
+              <EventGallery />
+            </ScrollAnimation>
           </div>
-          <ScrollAnimation animation="scale-up" delay={300}>
-            <div className="text-center mt-3 sm:mt-4 md:mt-5">
-              <Button asChild className="bg-ayzek-gradient hover:opacity-90 btn-hover-scale btn-shimmer text-[10px] sm:text-xs md:text-sm h-8 sm:h-9 md:h-10 px-3 sm:px-4 md:px-5">
-                <a href="/events">
-                  <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1 sm:mr-1.5" />
-                  Tüm Etkinlikleri Gör
-                  <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 ml-1 sm:ml-1.5" />
-                </a>
-              </Button>
-            </div>
-          </ScrollAnimation>
-        </div>
-      </InlineEditWrapper>
+        </InlineEditWrapper>
 
-      <InlineEditWrapper className="py-6 sm:py-8 md:py-12 px-3 sm:px-4">
-        <div className="container max-w-screen-xl mx-auto">
-          <ScrollAnimation animation="fade-up" className="text-center mb-4 sm:mb-5 md:mb-6">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-2 gradient-text">Etkinlik Galerisi</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto text-xs sm:text-sm md:text-base px-2 leading-snug">
-              Geçmiş etkinliklerimizden kareler ve unutulmaz anlar. Her fotoğrafın arkasında bir hikaye var.
-            </p>
-          </ScrollAnimation>
-          <ScrollAnimation animation="fade-up" delay={200}>
-            <EventGallery />
-          </ScrollAnimation>
-        </div>
-      </InlineEditWrapper>
-
-      {/* === Takımlarımız Önizleme (GÜNCELLENEN) === */}
-      <InlineEditWrapper className="py-6 sm:py-8 md:py-12 px-3 sm:px-4">
-        <div className="container max-w-screen-xl mx-auto">
-          <ScrollAnimation animation="fade-up" className="text-center mb-4 sm:mb-5 md:mb-6">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-2 gradient-text">Takımlarımız</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto text-xs sm:text-sm md:text-base px-2 leading-snug">
-              AYZEK'i ileriye taşıyan ekiplerle tanış. Projelerimizi omuzlayan takımlarımızı keşfet.
-            </p>
-          </ScrollAnimation>
-
-          {/* MOBİL: 2 kolon, TABLET: 2 kolon, DESKTOP: 4 kolon */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mb-2 sm:mb-3">
-            {teamsLoading ? (
-              <>
-                <TeamCardSkeleton />
-                <TeamCardSkeleton />
-                <TeamCardSkeleton />
-                <TeamCardSkeleton />
-              </>
-            ) : teamsError ? (
-              <p className="col-span-full text-center text-red-500 text-sm">Takımlar yüklenirken bir hata oluştu.</p>
-            ) : (
-              featuredTeams.map((t, i) => {
-                const pal = PALETTE[i % PALETTE.length];
-
-                return (
-                  <ScrollAnimation key={t.id} animation="scale-up" delay={i * 150}>
-                    <Link href="/teams" className="block">
-                      <div
-                        className={[
-                          "group cursor-pointer relative overflow-hidden rounded-[1.5rem] sm:rounded-[2rem] md:rounded-[2.5rem]",
-                          "w-full h-[240px] sm:h-[280px] md:h-[340px]",
-                          "bg-card/70 supports-[backdrop-filter]:bg-card/60 backdrop-blur",
-                          "border border-white/15 ring-1 ring-white/10",
-                          "hover:shadow-xl transition-all duration-300 hover:scale-105 p-3 sm:p-4 md:p-5",
-                          "flex flex-col items-center justify-center",
-                        ].join(" ")}
-                        aria-label={`${t.name} kartı`}
-                      >
-                        <div className="pointer-events-none absolute inset-0 rounded-[1.5rem] sm:rounded-[2rem] md:rounded-[2.5rem] p-[1px]">
-                          <div className={`h-full w-full rounded-[1.4rem] sm:rounded-[1.9rem] md:rounded-[2.4rem] bg-gradient-to-br ${pal.ring} opacity-40`} />
-                        </div>
-                        <div className={`relative z-10 grid place-items-center size-20 sm:size-24 md:size-32 rounded-full bg-gradient-to-br ${pal.ring} shadow-xl ${pal.glow} ring-1 ring-black/20 dark:ring-black/40 overflow-hidden`}>
-                          {t.logoUrl ? (
-                            <Image src={t.logoUrl} alt={t.name} fill className="object-cover" quality={60} />
-                          ) : (
-                            <Users className="size-5 sm:size-6 md:size-7 text-white/90" />
-                          )
-                          }
-                        </div>
-
-                        {/* Description Text */}
-                        <div className="relative z-10 mt-2 sm:mt-3 md:mt-4 w-full px-2 text-center">
-                          <p className="text-[10px] sm:text-xs md:text-sm text-white/75 leading-tight line-clamp-3 break-words min-h-[3.6em]">
-                            {t.description || ""}
-                          </p>
-                        </div>
-
-                        <div className="relative z-10 mt-2 sm:mt-3 text-center">
-                          <div className={`inline-flex items-center rounded-full px-2.5 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs md:text-sm font-semibold text-white bg-gradient-to-r ${pal.ring} backdrop-blur-[2px] shadow-md`}>
-                            {t.name}
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
-                  </ScrollAnimation>
-                );
-              })
-            )}
+        <InlineEditWrapper className="py-10 sm:py-12 md:py-16 px-3 sm:px-4">
+          <div className="container max-w-screen-xl mx-auto text-center">
+            <ScrollAnimation animation="fade-up">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-extrabold mb-2 sm:mb-3 md:mb-4 text-foreground">Etkinlik düzenlemek ister misin?</h2>
+              <p className="text-muted-foreground mb-6 sm:mb-7 md:mb-8 max-w-2xl mx-auto text-xs sm:text-sm md:text-base px-2">
+                Atölye, buluşma veya sunum için bir fikrin mi var? Bilgini topluluğumuzla paylaşmana yardımcı olmaktan memnuniyet duyarız.
+              </p>
+            </ScrollAnimation>
+            <ScrollAnimation animation="scale-up" delay={200}>
+              <Dialog open={isEventSuggestOpen} onOpenChange={setIsEventSuggestOpen}>
+                <DialogTrigger asChild>
+                  <Button size="lg" className="rounded-full text-sm sm:text-base px-6 sm:px-8 h-10 sm:h-12 bg-ayzek-gradient hover:opacity-90">
+                    <Send className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" />
+                    Etkinlik öner
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[600px]">
+                  <DialogHeader>
+                    <DialogTitle>Etkinlik önerisi gönder</DialogTitle>
+                    <DialogDescription>
+                      Etkinlik fikrini bizimle paylaş. Tüm öneriler değerlendirilir ve sana geri dönüş yapılır.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form onSubmit={handleEventSuggestSubmit} className="space-y-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="es-title">Etkinlik başlığı</Label>
+                      <Input
+                        id="es-title"
+                        value={eventSuggestForm.title}
+                        onChange={(e) => setEventSuggestForm({ ...eventSuggestForm, title: e.target.value })}
+                        placeholder="Örn: React ile Modern Web Geliştirme"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="es-description">Etkinlik açıklaması</Label>
+                      <Textarea
+                        id="es-description"
+                        value={eventSuggestForm.description}
+                        onChange={(e) => setEventSuggestForm({ ...eventSuggestForm, description: e.target.value })}
+                        placeholder="Etkinliğinin içeriği, hedefleri ve katılımcıların neler öğreneceği hakkında detaylı bilgi ver..."
+                        rows={4}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="es-contact">İletişim bilgisi</Label>
+                      <Input
+                        id="es-contact"
+                        type="email"
+                        value={eventSuggestForm.contact}
+                        onChange={(e) => setEventSuggestForm({ ...eventSuggestForm, contact: e.target.value })}
+                        placeholder="E-posta adresin"
+                        required
+                      />
+                    </div>
+                    <div className="flex justify-end space-x-4">
+                      <Button type="button" variant="outline" onClick={() => setIsEventSuggestOpen(false)}>
+                        İptal
+                      </Button>
+                      <Button type="submit" className="bg-ayzek-gradient hover:opacity-90">
+                        <Send className="w-4 h-4 mr-2" />
+                        Önerimi gönder
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </ScrollAnimation>
           </div>
+        </InlineEditWrapper>
+      </section>
 
-          <ScrollAnimation animation="scale-up" delay={400}>
-            <div className="text-center mt-2 sm:mt-3">
-              <Button asChild className="bg-ayzek-gradient hover:opacity-90 btn-hover-scale btn-shimmer text-[10px] sm:text-xs md:text-sm h-8 sm:h-9 md:h-10 px-3 sm:px-4 md:px-5">
-                <Link href="/teams" className="inline-flex items-center">
-                  <Users className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1 sm:mr-1.5" />
-                  Tüm Takımlarımızı Gör
-                  <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 ml-1 sm:ml-1.5" />
-                </Link>
-              </Button>
-            </div>
-          </ScrollAnimation>
-        </div>
-      </InlineEditWrapper>
+      {/* ============ TAKIMLARIMIZ ============ */}
+      <section id="ekip" className="scroll-mt-header">
+        <InlineEditWrapper className="section-band py-10 sm:py-14 md:py-18 px-3 sm:px-4">
+          <div className="container max-w-screen-xl mx-auto">
+            <ScrollAnimation animation="fade-up" className="text-center mb-6 sm:mb-8">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold mb-2 text-foreground">Takımlarımız</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto text-xs sm:text-sm md:text-base px-2 leading-snug">
+                Farklı alanlarda çalışan yetenekli takımlarımızla tanış. Her takım, kendi alanında öncü projeler geliştirerek topluluğumuzu güçlendiriyor.
+              </p>
+            </ScrollAnimation>
+            <ScrollAnimation animation="fade-up" delay={200}>
+              <TeamExplorer />
+            </ScrollAnimation>
+          </div>
+        </InlineEditWrapper>
+      </section>
 
-
-
-      <footer className="py-6 sm:py-8 md:py-10 px-3 sm:px-4 border-t border-border theme-transition bg-black/80">
+      {/* === Kapanış CTA bandı === */}
+      <section className="relative px-3 sm:px-4 py-10 sm:py-14 md:py-20">
         <div className="container max-w-screen-xl mx-auto">
           <ScrollAnimation animation="fade-in">
-            <div className="flex flex-col items-center space-y-3 sm:space-y-4">
-              <div className="flex items-center space-x-2">
-                <div className="relative w-5 h-5 sm:w-6 sm:h-6">
-                  <Image src="/ayzek-logo.png" alt="AYZEK" fill className="object-contain" quality={60} />
+            <div className="relative overflow-hidden border-2 border-foreground bg-ayzek-gradient px-5 sm:px-10 md:px-16 py-10 sm:py-14 md:py-16 text-center">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 opacity-[0.15]"
+                style={{
+                  backgroundImage: "radial-gradient(oklch(0.17 0.012 60) 1px, transparent 1px)",
+                  backgroundSize: "24px 24px",
+                }}
+              />
+              <div className="relative">
+                <h2 className="font-display font-extrabold text-3xl sm:text-4xl md:text-5xl text-foreground max-w-2xl mx-auto leading-tight mt-2">
+                  Sen de bu hikayenin bir parçası ol
+                </h2>
+                <p className="text-foreground/75 max-w-xl mx-auto text-sm sm:text-base mt-3 sm:mt-4 leading-relaxed">
+                  Hackathonlardan açık kaynağa, atölyelerden networking'e — AYZEK ailesine katılmak için tek adım kaldı.
+                </p>
+                <div className="mt-6 sm:mt-8">
+                  <MagneticButton className="inline-block">
+                    <Button asChild size="lg" className="bg-foreground text-background hover:opacity-85 btn-hover-scale btn-sweep px-8">
+                      <Link href="/join">
+                        Topluluğa katıl
+                        <ArrowRight className="w-4 h-4 ml-1.5" />
+                      </Link>
+                    </Button>
+                  </MagneticButton>
                 </div>
-                <span className="text-lg sm:text-xl font-display font-bold text-primary">AYZEK</span>
-              </div>
-              <p className="text-muted-foreground text-center max-w-md text-xs sm:text-sm md:text-base px-2">
-                Anılar inşa ediyor, bağlantıları güçlendiriyor ve geleceği birlikte yaratıyoruz.
-              </p>
-              <div className="flex items-center space-x-4 sm:space-x-6">
-                {/* sosyal linkler */}
-                <a href="https://youtube.com/@ayzekselcuk?si=8fbutC3-be5GmIne" className="text-muted-foreground hover:text-primary transition-colors" aria-label="YouTube">
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M23.498 6.186a2.965 2.965 0 0 0-2.087-2.1C19.561 3.5 12 3.5 12 3.5s-7.561 0-9.411.586a2.965 2.965 0 0 0-2.087 2.1A31.05 31.05 0 0 0 .5 12a31.05 31.05 0 0 0 .002 5.814 2.965 2.965 0 0 0 2.087 2.1C4.439 20.5 12 20.5 12 20.5s7.561 0 9.411-.586a2.965 2.965 0 0 0 2.087-2.1A31.05 31.05 0 0 0 23.5 12a31.05 31.05 0 0 0-.002-5.814zM9.75 15.02V8.98L15.5 12l-5.75 3.02z" />
-                  </svg>
-                </a>
-                <a href="https://www.linkedin.com/company/ayzek/" className="text-muted-foreground hover:text-primary transition-colors" aria-label="LinkedIn">
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-                  </svg>
-                </a>
-                <a href="https://github.com/Ayzek-2022" className="text-muted-foreground hover:text-primary transition-colors" aria-label="GitHub">
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-                  </svg>
-                </a>
-                <a href="https://www.instagram.com/20ayzek22?igsh=MWJmdDUydHF6d2M4ZA==" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Instagram">
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.057-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.073-1.689-.073-4.849 0-3.204.013-3.583.072-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.057-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
-                  </svg>
-                </a>
-              </div>
-              <div className="text-xs sm:text-sm text-muted-foreground">
-                <a href="mailto:ayzekselcukuni@gmail.com" className="hover:text-primary transition-colors">
-                  ayzekselcukuni@gmail.com
-                </a>
               </div>
             </div>
           </ScrollAnimation>
         </div>
-      </footer>
+      </section>
+
+      <SiteFooter />
 
       <ContentEditModal
         isOpen={editingSection === "about"}
@@ -479,76 +533,6 @@ export default function HomePage() {
           { key: "description", label: "Açıklama", type: "textarea", required: true },
         ]}
       />
-
-      <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
-        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-          {selectedEvent && (
-            <>
-              <div className="flex flex-col gap-6">
-                <div className="flex flex-col gap-2">
-                  <h2 className="text-2xl font-display font-bold break-words pr-8">{selectedEvent.title}</h2>
-                  <p className="text-base text-muted-foreground break-words whitespace-pre-wrap">{selectedEvent.description}</p>
-                </div>
-
-                <div className="relative w-full h-64">
-                  <Image
-                    src={normalizeImageUrl(selectedEvent.cover_image_url || selectedEvent.image_url) || "/placeholder.svg"}
-                    alt={selectedEvent.title}
-                    fill
-                    className="object-cover rounded-lg"
-                    quality={60}
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-5 h-5 text-primary" />
-                      <div>
-                        <div className="font-medium">
-                          {new Date(selectedEvent.start_at).toLocaleDateString("tr-TR", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          Saat: {formatTime(selectedEvent.start_at)}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-5 h-5 text-primary" />
-                      <span>{selectedEvent.location}</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    {selectedEvent.tags && Array.isArray(selectedEvent.tags) && selectedEvent.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {selectedEvent.tags.map((tag: string, index: number) => (
-                          <Badge key={index} variant="secondary">{tag}</Badge>
-                        ))}
-                      </div>
-                    )}
-
-                    {selectedEvent.category && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">Kategori:</span>
-                        <Badge className="bg-primary text-primary-foreground border-0">{selectedEvent.category}</Badge>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <Button asChild className="w-full bg-ayzek-gradient hover:opacity-90">
-                  <a href={selectedEvent.whatsapp_link || "#"} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    Etkinliğe Başvur
-                  </a>
-                </Button>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

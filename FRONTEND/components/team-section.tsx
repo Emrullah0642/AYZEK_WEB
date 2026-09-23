@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Github, Linkedin } from "lucide-react"
 import Image from "next/image"
+import { ScrollAnimation } from "@/components/scroll-animations"
+import { TiltCard } from "@/components/tilt-card"
 
 // --- YENİ EKLENEN KISIMLAR ---
 
@@ -117,7 +119,7 @@ export function TeamSection() {
   }, [groupedMembers]);
 
   if (isLoading) return <div className="text-center py-20">Ekibimiz yükleniyor...</div>;
-  if (error) return <div className="text-center py-20 text-red-500">Hata: {error}</div>;
+  if (error) return <div className="text-center py-20 text-destructive">Hata: {error}</div>;
 
   return (
     <div className="space-y-6 sm:space-y-8">
@@ -150,15 +152,18 @@ export function TeamSection() {
                 "
                 style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
               >
-                {members.map((member) => (
-                  <div
+                {members.map((member, i) => (
+                  <ScrollAnimation
                     key={member.id}
+                    animation="scale-up"
+                    delay={(i % 8) * 80}
                     className="
                       flex-none w-[65vw] sm:w-[55vw] snap-center
                       md:w-auto md:h-full
                     "
                   >
-                    <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-white/90 dark:bg-black/80 border border-black/10 dark:border-white/10 backdrop-blur-sm rounded-xl h-full">
+                  <TiltCard maxTilt={5} className="h-full">
+                    <Card className="group hover:shadow-[0_0_30px_-8px_oklch(0.62_0.21_258_/_0.5)] transition-all duration-300 hover:-translate-y-2 hover:border-primary/40 bg-white/90 dark:bg-card/70 border border-black/10 dark:border-foreground/10 backdrop-blur-sm rounded-xl h-full">
                       <CardHeader className="text-center p-3 md:p-4">
                         <div className="relative w-16 h-16 md:w-28 md:h-28 mx-auto mb-2">
                           {/* --- DEĞİŞİKLİK: next/image kullanıldı --- */}
@@ -202,7 +207,8 @@ export function TeamSection() {
                         </div>
                       </CardContent>
                     </Card>
-                  </div>
+                  </TiltCard>
+                  </ScrollAnimation>
                 ))}
               </div>
 

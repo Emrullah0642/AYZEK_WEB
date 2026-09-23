@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Calendar, Users, MapPin } from "lucide-react"
 import { api, API_BASE } from "@/lib/api"
 import Image from "next/image"
+import { ScrollAnimation } from "@/components/scroll-animations"
 
 // --- YENİ EKLENEN KISIMLAR ---
 
@@ -119,13 +120,14 @@ export default function EventGallery() {
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {items.map((photo, index) => (
-          <div
+          <ScrollAnimation
             key={photo.id}
-            className="
-            relative group cursor-pointer
-            flex-none w-[85vw] sm:w-[70vw] snap-center
-            md:w-auto
-          "
+            animation="scale-up"
+            delay={(index % 6) * 80}
+            className="flex-none w-[85vw] sm:w-[70vw] snap-center md:w-auto"
+          >
+          <div
+            className="relative group cursor-pointer"
             onMouseEnter={() => setHoveredId(photo.id)}
             onMouseLeave={() => setHoveredId(null)}
           >
@@ -155,7 +157,7 @@ export default function EventGallery() {
                     className="
                     w-full
                     h-[70%] md:h-[75%]
-                    bg-black/80 backdrop-blur
+                    bg-black/85
                     border border-white/10
                     pointer-events-auto
                     rounded-t-none md:rounded-t-lg
@@ -194,6 +196,7 @@ export default function EventGallery() {
               )}
             </div>
           </div>
+          </ScrollAnimation>
         ))}
       </div>
 

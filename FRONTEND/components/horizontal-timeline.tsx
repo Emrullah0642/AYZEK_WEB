@@ -181,10 +181,15 @@ export function HorizontalTimeline() {
   }, [dragOffset])
 
   if (isLoading) {
-    return <div className="flex justify-center items-center h-64 text-lg text-gray-500">Yükleniyor...</div>
+    return <div className="flex justify-center items-center h-40 text-sm text-muted-foreground">Yükleniyor...</div>
   }
   if (error) {
-    return <div className="flex justify-center items-center h-64 text-lg text-red-500">Hata: {error}</div>
+    return (
+      <div className="flex flex-col items-center justify-center gap-1.5 h-40 text-center px-4">
+        <p className="text-muted-foreground text-sm">Zaman kapsülü şu anda yüklenemedi.</p>
+        <p className="text-muted-foreground/60 text-xs">Birazdan tekrar dene.</p>
+      </div>
+    )
   }
 
   return (
