@@ -56,7 +56,7 @@ export function InlineEditWrapper({
               size="sm"
               variant="secondary"
               onClick={onEdit}
-              className="h-8 w-8 p-0 bg-blue-500 hover:bg-blue-600 text-white border-0 shadow-lg"
+              className="h-8 w-8 p-0 bg-primary hover:opacity-90 text-white border-0 shadow-lg"
             >
               <Edit className="w-3 h-3" />
               <span className="sr-only">{editLabel}</span>
@@ -88,7 +88,7 @@ export function InlineEditWrapper({
       )}
 
       {/* Edit Mode Indicator Border */}
-      <div className="absolute inset-0 border-2 border-dashed border-blue-400/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none rounded-lg" />
+      <div className="absolute inset-0 border-2 border-dashed border-primary/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none rounded-lg" />
     </div>
   )
 }

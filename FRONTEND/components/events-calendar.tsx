@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Calendar, Clock, MapPin, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react"
 import Image from "next/image"
+import { ScrollAnimation } from "@/components/scroll-animations"
+import { TiltCard } from "@/components/tilt-card"
 
 export type Event = {
   id: number
@@ -197,17 +199,17 @@ export function EventsCalendar({ events, loading }: EventsCalendarProps) {
           md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6
         "
       >
-        {filteredEvents.map((event) => {
+        {filteredEvents.map((event, index) => {
           const categoryLabel = (event.category ?? event.type ?? "").toString().trim() || "Etkinlik"
           return (
-            <div
+            <ScrollAnimation
               key={event.id}
-              className="
-                flex-none w-[72vw] sm:w-[58vw] snap-center
-                md:w-auto
-              "
+              animation="scale-up"
+              delay={(index % 6) * 80}
+              className="flex-none w-[72vw] sm:w-[58vw] snap-center md:w-auto"
             >
-              <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-black/80 backdrop-blur-sm border border-white/10">
+            <TiltCard maxTilt={5}>
+              <Card className="group hover:shadow-[0_0_30px_-8px_rgba(37,99,235,0.5)] transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 bg-card/70 backdrop-blur-sm border border-foreground/10">
                 <CardHeader className="relative overflow-hidden p-0">
                   <div className="relative h-32 sm:h-36 md:h-44 lg:h-48">
                     {/* !!! DEĞİŞİKLİK: normalizeImageUrl kullanıldı !!! */}
@@ -224,12 +226,12 @@ export function EventsCalendar({ events, loading }: EventsCalendarProps) {
 
                     {/* Kategori rozeti: SAĞ ÜST */}
                     <div className="absolute top-2 sm:top-3 md:top-4 right-2 sm:right-3 md:right-4">
-                      <Badge className="bg-primary text-primary-foreground border-0 shadow-sm text-[10px] sm:text-xs">
+                      <Badge className="bg-primary text-primary-foreground border-0 shadow-sm text-[10px] sm:text-xs transition-colors duration-300 group-hover:bg-accent group-hover:text-accent-foreground">
                         {categoryLabel}
                       </Badge>
                     </div>
 
-                    <div className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3 md:bottom-4 md:left-4 text-white">
+                    <div className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3 md:bottom-4 md:left-4 text-white transition-colors duration-300 group-hover:text-accent">
                       <div className="text-[10px] sm:text-xs md:text-sm font-medium">{formatDate(event.date)}</div>
                       <div className="text-[9px] sm:text-[11px] md:text-xs opacity-90">{formatTime(event.time)}</div>
                     </div>
@@ -340,7 +342,8 @@ export function EventsCalendar({ events, loading }: EventsCalendarProps) {
                   </Dialog>
                 </CardContent>
               </Card>
-            </div>
+            </TiltCard>
+            </ScrollAnimation>
           )
         })}
       </div>

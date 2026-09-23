@@ -1,64 +1,31 @@
 "use client"
 
-import { useEffect, useState, useMemo } from "react"
-import Particles, { initParticlesEngine } from "@tsparticles/react"
 import { usePathname } from "next/navigation"
-import { loadSlim } from "@tsparticles/slim"
 
+/**
+ * Zemin: düz kağıt/mürekkep rengi + ince nokta-grid. Blur, glow veya cam efekti yok —
+ * kağıda basılmış bir teknik döküman gibi keskin ve düz durur.
+ */
 export default function AnimatedBg() {
-  const [ready, setReady] = useState(false)
-
-  useEffect(() => {
-    initParticlesEngine(async (engine) => {
-      await loadSlim(engine)
-    }).then(() => setReady(true))
-  }, [])
-
-  // Dark tema sabit olduğu için tek renk seti yeterli
-  const colors = useMemo(
-    () => ({
-      dot: "#7dd3fc" /* cyan-300 */,
-      link: "#86efac" /* green-300 */,
-    }),
-    []
-  )
-
   const pathname = usePathname()
-
-  if (!ready || pathname?.startsWith("/admin")) return null
+  if (pathname?.startsWith("/admin")) return null
 
   return (
-    <>
-      <div className="pointer-events-none fixed inset-0 z-0 bg-gradient-to-br from-background via-card to-muted" aria-hidden="true" />
-      <Particles
-        id="ayzek-animated-bg"
-        options={{
-          fullScreen: { enable: true, zIndex: 0 },
-          background: { color: { value: "transparent" } },
-          fpsLimit: 60,
-          detectRetina: true,
-          particles: {
-            number: { value: 100, density: { enable: true } },
-            color: { value: colors.dot },
-            shape: { type: "circle" },
-            opacity: { value: 0.4 },
-            size: { value: { min: 1.5, max: 2.5 } },
-            move: { enable: true, speed: 1.0, outModes: { default: "bounce" } },
-            links: {
-              enable: true,
-              color: colors.link,
-              distance: 160,
-              opacity: 0.25,
-              width: 1,
-            },
-          },
-          interactivity: {
-            detectsOn: "window",
-            events: { onHover: { enable: true, mode: "repulse" }, resize: { enable: true } },
-            modes: { repulse: { distance: 100, duration: 0.4 } },
-          },
+    <div className="pointer-events-none fixed inset-0 z-0 bg-background overflow-hidden" aria-hidden="true">
+      <div
+        className="absolute inset-0 block dark:hidden"
+        style={{
+          backgroundImage: "radial-gradient(oklch(0.17 0.012 60 / 7%) 1px, transparent 1px)",
+          backgroundSize: "32px 32px",
         }}
       />
-    </>
+      <div
+        className="absolute inset-0 hidden dark:block"
+        style={{
+          backgroundImage: "radial-gradient(oklch(1 0 0 / 7%) 1px, transparent 1px)",
+          backgroundSize: "32px 32px",
+        }}
+      />
+    </div>
   )
 }

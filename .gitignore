@@ -1,3 +1,6 @@
+# --- CLAUDE CODE (yerel ayarlar, repoya gitmemeli) ---
+.claude/
+
 # --- GENEL YASAKLILAR ---
 node_modules/
 venv/
