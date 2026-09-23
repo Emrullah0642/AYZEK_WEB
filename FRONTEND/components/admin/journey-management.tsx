@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 // !!! DEĞİŞİKLİK BURADA: axios yerine bizim ayarlı api'yi çağırıyoruz !!!
 import { api, API_BASE } from "@/lib/api"
 import { Button } from "@/components/ui/button"
@@ -61,11 +61,7 @@ export function JourneyManagement({ onNotify }: { onNotify: (msg: string) => voi
     return arr
   })()
 
-  useEffect(() => {
-    fetchJourneyPeople()
-  }, [])
-
-  const fetchJourneyPeople = async () => {
+  const fetchJourneyPeople = useCallback(async () => {
     setLoading(true)
     try {
       // api.get (Cookie otomatik gider)
@@ -77,7 +73,11 @@ export function JourneyManagement({ onNotify }: { onNotify: (msg: string) => voi
     } finally {
       setLoading(false)
     }
-  }
+  }, [onNotify])
+
+  useEffect(() => {
+    fetchJourneyPeople()
+  }, [fetchJourneyPeople])
 
   // --- YENİ EKLEME FONKSİYONU ---
   const handleAdd = async () => {

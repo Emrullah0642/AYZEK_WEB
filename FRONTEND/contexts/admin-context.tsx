@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
+import { api } from "@/lib/api"
 
 interface ContentItem {
   id: string
@@ -201,6 +202,25 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       setAdminUser(null)
     }
   }, [isAdminLoggedIn])
+
+  // Cookie tabanlı gerçek admin oturumunu kontrol et — bu olmadan isAdminLoggedIn hiç true olmuyordu
+  // ve anasayfadaki InlineEditWrapper/düzenleme butonları hiçbir zaman görünmüyordu.
+  useEffect(() => {
+    let cancelled = false
+    api
+      .get("/admin/me")
+      .then(({ data }) => {
+        if (cancelled) return
+        setIsAdminLoggedIn(true)
+        if (data?.email) setAdminUser({ email: data.email, name: data.email })
+      })
+      .catch(() => {
+        if (!cancelled) setIsAdminLoggedIn(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   return (
     <AdminContext.Provider

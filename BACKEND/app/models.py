@@ -124,6 +124,18 @@ class EventSuggestion(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
+class Award(Base):
+    __tablename__ = "awards"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    title: Mapped[str] = mapped_column(String(200), nullable=False)          # Ödül adı
+    description: Mapped[str] = mapped_column(Text, nullable=False)           # Açıklama
+    image_url: Mapped[str | None] = mapped_column(String(500))               # Görsel/rozet URL
+    year: Mapped[int | None] = mapped_column(Integer, index=True)            # Kazanılan yıl
+    order_index: Mapped[int] = mapped_column(Integer, default=0, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
 class Poster(Base):
     __tablename__ = "posters"
 
@@ -156,54 +168,9 @@ class Admin(Base):
     __tablename__ = "admins" # Bu tablo adını veritabanınızdakine göre değiştirin
 
     id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True, index=True)
-    password = Column(String)
+    email = Column(String(255), unique=True, index=True, nullable=False)
+    password = Column(String(255), nullable=False)
     totp_secret = Column(String, nullable=True)
-
-
-class TeamMember(Base):
-    __tablename__ = 'team_members'
-
-    id = Column(Integer, primary_key=True, index=True)
-    
-    # Üye Bilgileri
-    name = Column(String(100), nullable=False)
-    role = Column(String(100), nullable=False)
-    linkedin_url = Column(String(255), nullable=True)
-    
-    # İlişki
-    team_id = Column(Integer, ForeignKey('teams.id'), nullable=False)
-    team = relationship("Team", back_populates="members")
-
-    def __repr__(self):
-        return f"<TeamMember(name='{self.name}', role='{self.role}')>"
-
-# Takım Modeli
-class Team(Base):
-    __tablename__ = 'teams'
-
-    id = Column(Integer, primary_key=True, index=True)
-
-    # Temel Takım Bilgileri
-    name = Column(String(100), unique=True, nullable=False)
-    slug = Column(String(100), unique=True, nullable=False) # Zorunlu SLUG
-    project_name = Column(String(150), nullable=False)
-    category = Column(String(100), nullable=False)
-    
-    # Detay ve Görsel
-    description = Column(Text, nullable=False)
-    is_featured = Column(Boolean, default=False)
-    photo_url = Column(String(255), nullable=True)
-    
-    # Zaman Bilgileri
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    # İlişki
-    members = relationship("TeamMember", back_populates="team", cascade="all, delete-orphan")
-
-    def __repr__(self):
-        return f"<Team(name='{self.name}', slug='{self.slug}')>"
 
 
 class JourneyPerson(Base):

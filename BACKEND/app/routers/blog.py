@@ -14,6 +14,7 @@ from app.crud.blog import list_blogs, get_blog, create_blog, update_blog, delete
 # !!! GÜVENLİK İÇİN GEREKLİ IMPORT !!!
 from app.security import get_current_admin
 
+from app.models import Admin
 router = APIRouter(prefix="/blogs", tags=["blogs"])
 
 # Resimlerin kaydedileceği klasör
@@ -53,7 +54,7 @@ def api_create_blog(
     file: Optional[UploadFile] = File(None), 
     db: Session = Depends(get_db),
     # !!! KİLİT BURADA !!!
-    current_admin: dict = Depends(get_current_admin)
+    current_admin: Admin = Depends(get_current_admin)
 ):
     final_cover_image = cover_image
 
@@ -101,7 +102,7 @@ def api_update_blog(
     file: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
     # !!! KİLİT BURADA !!!
-    current_admin: dict = Depends(get_current_admin)
+    current_admin: Admin = Depends(get_current_admin)
 ):
     # Önce kaydı bulalım
     existing_blog = get_blog(db, blog_id)
@@ -147,7 +148,7 @@ def api_delete_blog(
     blog_id: int, 
     db: Session = Depends(get_db),
     # !!! KİLİT BURADA !!!
-    current_admin: dict = Depends(get_current_admin)
+    current_admin: Admin = Depends(get_current_admin)
 ):
     ok = delete_blog(db, blog_id)
     if not ok:

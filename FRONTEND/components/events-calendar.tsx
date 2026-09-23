@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from "react"
 // !!! DEĞİŞİKLİK: Backend adresini almak için import
-import { API_BASE } from "@/lib/api"
+import { normalizeImageUrl } from "@/lib/normalize-image-url"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -34,23 +34,6 @@ interface EventsCalendarProps {
 }
 
 // --- YARDIMCI FONKSİYONLAR ---
-
-// Resim URL'sini düzeltir (Başına 94.177.147.50:8000ekler)
-const normalizeImageUrl = (v: string | null | undefined) => {
-  const s = (v || "").trim()
-  if (!s) return ""
-
-  if (s.startsWith("http://") || s.startsWith("https://")) return s
-
-  const path = s.startsWith("/") ? s : `/${s}`
-
-  if (path.startsWith("/public/") || path.startsWith("/uploads/")) {
-    return `${API_BASE}${path}`
-  }
-
-  // Fallback: Diğer durumlar için varsayılan olarak backend'e yönlendir
-  return `${API_BASE}/public/uploads${path}`
-}
 
 const parseDate = (value: string) => {
   const d1 = new Date(value)

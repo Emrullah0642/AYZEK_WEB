@@ -1,7 +1,10 @@
 import boto3
 import os
+import logging
 from PIL import Image
 import io
+
+logger = logging.getLogger("uvicorn.error")
 
 ACCESS_KEY = os.getenv("R2_ACCESS_KEY")
 SECRET_KEY = os.getenv("R2_SECRET_KEY")
@@ -43,6 +46,6 @@ def upload_file_to_r2(file_obj, filename, content_type):
         final_url = f"{PUBLIC_DOMAIN}/{filename}"
         return final_url
 
-    except Exception as e:
-        print(f"🔴 R2 Yükleme Hatası: {e}")
+    except Exception:
+        logger.exception("R2 yükleme hatası")
         return None

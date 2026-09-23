@@ -1,17 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   // Site tek sayfa (single-page scroll) oldu — eski ayrı sayfalar artık anasayfadaki bölümlere yönleniyor.
   async redirects() {
     return [
       { source: "/about", destination: "/#hakkimizda", permanent: false },
       { source: "/events", destination: "/#etkinlikler", permanent: false },
-      { source: "/teams", destination: "/#ekip", permanent: false },
+      { source: "/teams", destination: "/#ekibimiz", permanent: false },
     ]
   },
   images: {

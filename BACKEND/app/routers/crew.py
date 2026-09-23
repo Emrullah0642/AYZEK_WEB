@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.crud import crew as crud
 from app.schemas.crew import CrewMemberCreate, CrewMemberRead, CrewMemberUpdate
-from app.models import CrewMember 
+from app.models import CrewMember, Admin
 
 # !!! GÜVENLİK İÇİN GEREKLİ IMPORT !!!
 from app.security import get_current_admin
@@ -45,7 +45,7 @@ def create_crew_member(
     file: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
     # !!! KİLİT BURADA !!!
-    current_admin: dict = Depends(get_current_admin)
+    current_admin: Admin = Depends(get_current_admin)
 ):
     final_photo_url = photo_url
 
@@ -88,7 +88,7 @@ def update_crew_member(
     file: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
     # !!! KİLİT BURADA !!!
-    current_admin: dict = Depends(get_current_admin)
+    current_admin: Admin = Depends(get_current_admin)
 ):
     # Önce üye var mı kontrol et
     db_member = db.query(CrewMember).filter(CrewMember.id == member_id).first()
@@ -132,7 +132,7 @@ def delete_crew_member(
     member_id: int, 
     db: Session = Depends(get_db),
     # !!! KİLİT BURADA !!!
-    current_admin: dict = Depends(get_current_admin)
+    current_admin: Admin = Depends(get_current_admin)
 ):
     success = crud.delete_crew_member(db=db, member_id=member_id)
     if not success:

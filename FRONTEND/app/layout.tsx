@@ -9,6 +9,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import AnimatedBg from "@/components/ui/animated-bg"
 import { SplashScreen } from "@/components/splash-screen"
 import { NotificationsProvider } from "@/contexts/notifications"
+import { Toaster } from "@/components/ui/sonner"
 import { GoogleTagManager } from '@next/third-parties/google'
 
 const displayFont = Plus_Jakarta_Sans({
@@ -98,6 +99,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {children}
             </AdminProvider>
           </NotificationsProvider>
+          <Toaster position="bottom-right" richColors />
         </ThemeProvider>
 
         {/* Google Tag Manager Entegrasyonu */}

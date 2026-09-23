@@ -5,8 +5,9 @@ import uuid
 import re
 from typing import List, Optional
 from datetime import datetime
+import logging
 
-from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile, Form
+from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile, Form, Query
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -15,8 +16,10 @@ from app.crud import events as crud_events
 
 # !!! GÜVENLİK İÇİN GEREKLİ IMPORT !!!
 from app.security import get_current_admin
+from app.models import Admin
 
 router = APIRouter(prefix="/events", tags=["events"])
+logger = logging.getLogger("uvicorn.error")
 
 # Resimlerin kaydedileceği klasör
 UPLOAD_DIR = "public/uploads"
@@ -34,11 +37,11 @@ def slugify(text: str) -> str:
 
 # --- GET (HERKESE AÇIK) ---
 @router.get("", response_model=List[Event])
-def get_events(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+def get_events(skip: int = 0, limit: int = Query(100, le=200), db: Session = Depends(get_db)):
     return crud_events.get_events(db, skip, limit)
 
 @router.get("/upcoming", response_model=List[Event])
-def get_upcoming_events(limit: int = 1000, db: Session = Depends(get_db)):
+def get_upcoming_events(limit: int = Query(100, le=200), db: Session = Depends(get_db)):
     return crud_events.get_upcoming_events(db, limit)
 
 @router.get("/slug/{slug}", response_model=Event)
@@ -75,7 +78,7 @@ def create_event(
     image_url: Optional[str] = Form(None),
     file: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
-    current_admin: dict = Depends(get_current_admin)
+    current_admin: Admin = Depends(get_current_admin)
 ):
     try:
         final_image_url = image_url
@@ -119,10 +122,12 @@ def create_event(
         )
 
         return crud_events.create_event(db, payload)
-    
-    except Exception as e:
-        print(f"HATA OLUŞTU: {str(e)}") # Konsola hatayı bas
-        raise HTTPException(status_code=500, detail=f"Sunucu Hatası: {str(e)}")
+
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Etkinlik oluşturulurken beklenmeyen hata")
+        raise HTTPException(status_code=500, detail="Etkinlik oluşturulurken bir hata oluştu.")
 
 # --- UPDATE (KİLİTLİ - SADECE ADMIN) ---
 @router.put("/{event_id}", response_model=Event)
@@ -139,7 +144,7 @@ def update_event(
     image_url: Optional[str] = Form(None),
     file: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
-    current_admin: dict = Depends(get_current_admin)
+    current_admin: Admin = Depends(get_current_admin)
 ):
     existing_event = crud_events.get_event(db, event_id)
     if not existing_event:
@@ -162,14 +167,12 @@ def update_event(
     if title is not None: update_data["title"] = title
     if description is not None: update_data["description"] = description
     
-    # Tarih/Saat güncellemesi varsa birleştir
-    if date is not None and time is not None:
-        update_data["start_at"] = f"{date}T{time}:00"
-    elif date is not None:
-        # Sadece tarih geldiyse saati eskisi gibi korumak zor, 
-        # frontend'in ikisini de göndermesi en sağlıklısıdır.
-        # Basitlik adına şimdilik pas geçiyoruz veya hata vermesin diye ellemiyoruz.
-        pass
+    # Tarih/Saat güncellemesi varsa birleştir — sadece biri gelirse diğerini mevcut kayıttan al
+    if date is not None or time is not None:
+        existing_date, existing_time = existing_event.start_at.date(), existing_event.start_at.time()
+        new_date = date if date is not None else existing_date.isoformat()
+        new_time = time if time is not None else existing_time.strftime("%H:%M")
+        update_data["start_at"] = f"{new_date}T{new_time}:00"
 
     if location is not None: update_data["location"] = location
     if max_attendees is not None: update_data["capacity"] = max_attendees # Şemada capacity olarak geçiyor olabilir dikkat
@@ -192,7 +195,7 @@ def update_event(
 def delete_event(
     event_id: int, 
     db: Session = Depends(get_db),
-    current_admin: dict = Depends(get_current_admin)
+    current_admin: Admin = Depends(get_current_admin)
 ):
     event = crud_events.delete_event(db, event_id)
     if event is None:

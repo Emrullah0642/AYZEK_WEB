@@ -53,7 +53,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
       message: "Hackathon 2025 etkinliği takvime eklendi. Katılmak için tıkla.",
       createdAt: Date.now() - 1000 * 60 * 10,
       read: false,
-      href: "/events/123",
+      href: "/#etkinlikler",
     },
   ]
 

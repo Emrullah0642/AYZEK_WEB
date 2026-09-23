@@ -27,10 +27,10 @@ typing-inspection==0.4.1
 typing_extensions==4.15.0
 uvicorn==0.37.0
 bcrypt==3.2.2
-slowapi
-pyotp
-qrcode
-unidecode
-itsdangerous
-boto3
-Pillow
+slowapi==0.1.10
+pyotp==2.10.0
+qrcode==8.2
+unidecode==1.4.0
+itsdangerous==2.2.0
+boto3==1.43.99
+Pillow==12.3.0

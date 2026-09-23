@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 // !!! DEĞİŞİKLİK BURADA: axios yerine bizim ayarlı api'yi çağırıyoruz !!!
 import { api, API_BASE } from "@/lib/api"
 import { Button } from "@/components/ui/button"
@@ -67,11 +67,7 @@ export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }
   // Ortak Dosya State'i
   const [crewFile, setCrewFile] = useState<File | null>(null)
 
-  useEffect(() => {
-    fetchCrewMembers()
-  }, [])
-
-  const fetchCrewMembers = async () => {
+  const fetchCrewMembers = useCallback(async () => {
     setLoading(true)
     try {
       // api.get (Cookie otomatik gider)
@@ -83,7 +79,11 @@ export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }
     } finally {
       setLoading(false)
     }
-  }
+  }, [onNotify])
+
+  useEffect(() => {
+    fetchCrewMembers()
+  }, [fetchCrewMembers])
 
   // --- YENİ EKLEME FONKSİYONU ---
   const handleAdd = async () => {

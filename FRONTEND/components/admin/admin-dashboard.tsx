@@ -8,7 +8,7 @@ import { Calendar, Lightbulb, LogOut, FileText, Lock, ShieldCheck, QrCode, Loade
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 
 // Alt Bileşenler (Dosya yollarını kontrol et)
 import EventsTab from "@/components/admin/admin-etkinlikler";

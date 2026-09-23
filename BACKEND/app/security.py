@@ -11,16 +11,19 @@ from sqlalchemy.orm import Session
 import os
 
 from .database import get_db
+from .models import Admin
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # --- ENV ---
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "CHANGE_ME_IN_PROD")
+SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError(
+        "JWT_SECRET_KEY bulunamadı. .env dosyanızı kontrol edin — "
+        "bu değişken olmadan uygulama, tahmin edilebilir bir secret ile admin token'ları imzalamaz."
+    )
 ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
-
-if SECRET_KEY == "CHANGE_ME_IN_PROD":
-    print("UYARI: JWT_SECRET_KEY .env'den okunamadı, varsayılan kullanılıyor!")
 
 # Swagger UI için Bearer şeması (Görsel amaçlı kalabilir)
 security = HTTPBearer(auto_error=False)
@@ -50,7 +53,7 @@ def decode_access_token(token: str) -> Optional[dict]:
 def require_admin(
     request: Request,
     db: Session = Depends(get_db),
-):
+) -> Admin:
     token = None
     
     # 1. Önce güvenli Cookie'ye bak (admin_token)
@@ -81,11 +84,7 @@ def require_admin(
     email = payload.get("sub")
     
     # DB kontrolü
-    try:
-        from .models import Admin  # lazy import
-        admin = db.query(Admin).filter(Admin.email == email).first()
-    except Exception:
-        admin = None
+    admin = db.query(Admin).filter(Admin.email == email).first()
 
     if not admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin privileges required")
@@ -93,5 +92,5 @@ def require_admin(
     return admin
 
 # Router'ların beklediği isim:
-def get_current_admin(admin = Depends(require_admin)):
+def get_current_admin(admin: Admin = Depends(require_admin)) -> Admin:
     return admin

@@ -36,7 +36,7 @@ export function DeleteConfirmationModal({
           <DialogTitle className="text-xl font-display text-red-500">{title}</DialogTitle>
           <DialogDescription className="text-center">
             {description}
-            {itemName && <span className="block mt-2 font-medium text-foreground">"{itemName}"</span>}
+            {itemName && <span className="block mt-2 font-medium text-foreground">&quot;{itemName}&quot;</span>}
           </DialogDescription>
         </DialogHeader>
 

@@ -88,7 +88,7 @@ export default function JoinPage() {
         <div className="container max-w-screen-xl mx-auto">
           <ScrollAnimation animation="fade-up">
             <div className="text-center mb-4">
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-2 gradient-text">Neden AYZEK'e Katılmalısınız?</h2>
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-2 gradient-text">Neden AYZEK&apos;e Katılmalısınız?</h2>
               <p className="text-muted-foreground max-w-2xl mx-auto text-xs sm:text-sm md:text-base px-2 leading-snug">
                 Gelişen teknoloji topluluğumuzun parçası olmanın avantajlarını keşfedin
               </p>
