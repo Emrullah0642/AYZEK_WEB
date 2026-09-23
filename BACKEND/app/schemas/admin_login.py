@@ -1,8 +1,8 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from typing import Optional
 
 class AdminLogin(BaseModel):
-    email: str
+    email: EmailStr
     password: str
     totp_code: Optional[str] = None
 

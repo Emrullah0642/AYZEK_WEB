@@ -1,3 +1,4 @@
+import os
 import pyotp
 import qrcode
 import io
@@ -23,6 +24,9 @@ from ..security import (
 from ..limiter import limiter
 
 router = APIRouter(prefix="/admin", tags=["admin"])
+
+# Varsayılan "production": sadece ENVIRONMENT=development açıkça set edilmişse cookie'yi HTTP üzerinden de kabul et.
+IS_PRODUCTION = os.getenv("ENVIRONMENT", "production").lower() != "development"
 
 # --- LOGIN FONKSİYONU (HTTPONLY COOKIE GÜNCELLEMESİ) ---
 @router.post("/login")
@@ -71,7 +75,7 @@ def login_admin(response: Response, request: Request, credentials: AdminLogin, d
         max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60, # Saniye cinsinden ömür
         expires=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         samesite="lax",              # CSRF koruması için
-        secure=False,                # Localhost'ta (HTTP) çalışması için False. Canlıda (HTTPS) True yapılmalı!
+        secure=IS_PRODUCTION,        # Prod'da (HTTPS) True; sadece ENVIRONMENT=development ile localhost'ta False.
     )
     
     # Frontend'e sadece bilgi dönüyoruz, token yok!
@@ -95,8 +99,8 @@ def get_me(current_admin: AdminModel = Depends(require_admin)):
 # --- LOGOUT (COOKIE SİLME) ---
 @router.post("/logout")
 def logout(response: Response, current_admin: AdminModel = Depends(require_admin)):
-    # Çıkış yaparken cookie'yi siliyoruz
-    response.delete_cookie(key="admin_token")
+    # Çıkış yaparken cookie'yi siliyoruz — set_cookie ile aynı samesite/secure ile, aksi halde bazı tarayıcılar silmez
+    response.delete_cookie(key="admin_token", samesite="lax", secure=IS_PRODUCTION)
     return {"message": "Başarıyla çıkış yapıldı"}
 
 @router.get("/dashboard")

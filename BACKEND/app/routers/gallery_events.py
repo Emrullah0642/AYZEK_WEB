@@ -18,6 +18,7 @@ from app.schemas.gallery_events import (
 # !!! GÜVENLİK İÇİN GEREKLİ IMPORT !!!
 from app.security import get_current_admin
 
+from app.models import Admin
 # Prefix senin kodunda /api/gallery-events idi, aynen koruyoruz.
 router = APIRouter(prefix="/api/gallery-events", tags=["gallery-events"])
 
@@ -49,7 +50,7 @@ def create_event(
     file: Optional[UploadFile] = File(None), # Dosya parametresi
     db: Session = Depends(get_db),
     # !!! KİLİT BURADA !!!
-    current_admin: dict = Depends(get_current_admin)
+    current_admin: Admin = Depends(get_current_admin)
 ):
     final_image_url = image_url
 
@@ -89,7 +90,7 @@ async def update_event(
     file: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
     # !!! KİLİT BURADA !!!
-    current_admin: dict = Depends(get_current_admin)
+    current_admin: Admin = Depends(get_current_admin)
 ):
     # Önce kaydın var olup olmadığını kontrol edelim
     existing_obj = crud.get_gallery_event(db, event_id)
@@ -139,7 +140,7 @@ def delete_event(
     event_id: int, 
     db: Session = Depends(get_db),
     # !!! KİLİT BURADA !!!
-    current_admin: dict = Depends(get_current_admin)
+    current_admin: Admin = Depends(get_current_admin)
 ):
     ok = crud.delete_gallery_event(db, event_id)
     if not ok:

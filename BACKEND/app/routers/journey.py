@@ -14,6 +14,7 @@ from app.schemas.journey import JourneyPersonCreate, JourneyPersonRead, JourneyP
 # !!! GÜVENLİK İÇİN GEREKLİ IMPORT !!!
 from app.security import get_current_admin
 
+from app.models import Admin
 router = APIRouter(
     prefix="/journey",
     tags=["Journey"]
@@ -45,7 +46,7 @@ def create_journey_person(
     file: Optional[UploadFile] = File(None), # Dosya parametresi
     db: Session = Depends(get_db),
     # !!! KİLİT BURADA !!!
-    current_admin: dict = Depends(get_current_admin)
+    current_admin: Admin = Depends(get_current_admin)
 ):
     """
     Admin panelinden gelen verilerle yeni bir kişi kaydı oluşturur.
@@ -87,7 +88,7 @@ def update_journey_person(
     file: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
     # !!! KİLİT BURADA !!!
-    current_admin: dict = Depends(get_current_admin)
+    current_admin: Admin = Depends(get_current_admin)
 ):
     """
     ID'ye göre belirtilen kişi kaydının bilgilerini günceller.
@@ -128,7 +129,7 @@ def delete_journey_person(
     person_id: int, 
     db: Session = Depends(get_db),
     # !!! KİLİT BURADA !!!
-    current_admin: dict = Depends(get_current_admin)
+    current_admin: Admin = Depends(get_current_admin)
 ):
     """
     ID'ye göre belirtilen kişi kaydını veritabanından siler.

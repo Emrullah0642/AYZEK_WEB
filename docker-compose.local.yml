@@ -20,6 +20,7 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg2://postgres:${POSTGRES_PASSWORD}@db:5432/ayzek_db
       ALLOWED_ORIGINS: "http://localhost:3000"
+      ENVIRONMENT: development
     env_file:
       - .env
     ports:

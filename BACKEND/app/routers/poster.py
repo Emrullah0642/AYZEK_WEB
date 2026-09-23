@@ -13,6 +13,7 @@ from app.crud import poster
 # !!! GÜVENLİK İÇİN GEREKLİ IMPORT !!!
 from app.security import get_current_admin
 
+from app.models import Admin
 router = APIRouter(prefix="/posters", tags=["posters"])
 
 # Resimlerin kaydedileceği klasör
@@ -48,7 +49,7 @@ def create_poster(
     file: Optional[UploadFile] = File(None), # Dosya seçilirse
     db: Session = Depends(get_db),
     # !!! KİLİT BURADA !!!
-    current_admin: dict = Depends(get_current_admin)
+    current_admin: Admin = Depends(get_current_admin)
 ):
     final_image_url = image_url
 
@@ -88,7 +89,7 @@ def update_poster(
     file: Optional[UploadFile] = File(None), # Yeni dosya yüklenirse
     db: Session = Depends(get_db),
     # !!! KİLİT BURADA !!!
-    current_admin: dict = Depends(get_current_admin)
+    current_admin: Admin = Depends(get_current_admin)
 ):
     db_obj = poster.get(db, poster_id)
     if not db_obj:
@@ -125,7 +126,7 @@ def delete_poster(
     poster_id: int, 
     db: Session = Depends(get_db),
     # !!! KİLİT BURADA !!!
-    current_admin: dict = Depends(get_current_admin)
+    current_admin: Admin = Depends(get_current_admin)
 ):
     db_obj = poster.get(db, poster_id)
     if not db_obj:
@@ -139,7 +140,7 @@ def reorder_posters(
     ids_in_order: List[int], 
     db: Session = Depends(get_db),
     # !!! KİLİT BURADA !!!
-    current_admin: dict = Depends(get_current_admin)
+    current_admin: Admin = Depends(get_current_admin)
 ):
     posters = poster.get_multi(db, limit=10000)
     id_to_obj = {p.id: p for p in posters}

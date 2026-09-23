@@ -57,7 +57,7 @@ function PersonCard({ leader }: { leader: Leader }) {
       </CardHeader>
       {leader.about && (
         <CardContent className="pt-0 px-2.5 pb-3 sm:px-3 sm:pb-4 md:px-4">
-          <p className="text-[10px] sm:text-xs md:text-sm text-center italic line-clamp-3 min-h-[3.75em] break-words whitespace-pre-wrap">"{leader.about}"</p>
+          <p className="text-[10px] sm:text-xs md:text-sm text-center italic line-clamp-3 min-h-[3.75em] break-words whitespace-pre-wrap">&quot;{leader.about}&quot;</p>
         </CardContent>
       )}
     </Card>
@@ -139,7 +139,7 @@ export function CommunityJourney() {
       <p className="text-muted-foreground/60 text-xs">Birazdan tekrar dene.</p>
     </div>
   )
-  if (slides.length === 0) return <div className="text-center py-16 text-sm text-muted-foreground">Gösterilecek "Yolculuğumuz" verisi bulunamadı.</div>
+  if (slides.length === 0) return <div className="text-center py-16 text-sm text-muted-foreground">Gösterilecek &quot;Yolculuğumuz&quot; verisi bulunamadı.</div>
 
   const currentYear = slides[activeIdx]?.year ?? slides[0]?.year;
   const slide = slides[activeIdx];
@@ -149,7 +149,7 @@ export function CommunityJourney() {
       <div className="text-center mb-6 sm:mb-8 md:mb-10 px-2">
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold mb-3 sm:mb-4 text-foreground">Zaman çizelgemiz</h2>
         <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base">
-          AYZEK'i teknoloji meraklıları ve yenilikçiler için canlı bir topluluk haline getiren tutkulu bireylerdir.
+          AYZEK&apos;i teknoloji meraklıları ve yenilikçiler için canlı bir topluluk haline getiren tutkulu bireylerdir.
         </p>
       </div>
 

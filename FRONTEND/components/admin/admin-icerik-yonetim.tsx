@@ -3,13 +3,13 @@
 import { useState } from "react"
 import { useAdmin } from "@/contexts/admin-context"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Home, Clock, Images, Users, UsersIcon, Briefcase } from "lucide-react"
+import { Home, Clock, Images, Users, UsersIcon, Trophy } from "lucide-react"
 import { PosterManagement } from "@/components/admin/poster-management"
 import { TimelineManagement } from "@/components/admin/timeline-management"
 import { GalleryManagement } from "@/components/admin/gallery-management"
 import { JourneyManagement } from "@/components/admin/journey-management"
-import { TeamManagement } from "@/components/admin/team-management"
 import { CrewManagement } from "@/components/admin/crew-management"
+import { AwardsManagement } from "@/components/admin/awards-management"
 
 export default function ContentManagementTab() {
   const { addNotification } = useAdmin()
@@ -88,25 +88,6 @@ export default function ContentManagementTab() {
         </CardContent>
       </Card>
 
-      {/* Takımlar */}
-      <Card className="bg-gradient-to-br from-card/80 to-card/50 border-purple-500/20 hover:border-purple-500/40 transition-all duration-300">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-purple-500/10">
-              <Briefcase className="w-5 h-5 text-purple-500" />
-            </div>
-            Takımlar
-          </CardTitle>
-          <CardDescription>Yarışma ve proje takımlarını yönetin</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="px-3 py-2 rounded-lg bg-muted/50">
-            <p className="text-sm text-muted-foreground">Takım ve üyelerini ekleyin</p>
-          </div>
-          <TeamManagement onNotify={handleNotify} />
-        </CardContent>
-      </Card>
-
       {/* Ekibimiz */}
       <Card className="bg-gradient-to-br from-card/80 to-card/50 border-pink-500/20 hover:border-pink-500/40 transition-all duration-300">
         <CardHeader>
@@ -123,6 +104,22 @@ export default function ContentManagementTab() {
             <p className="text-sm text-muted-foreground">4 kategori: Başkan, Sosyal Medya, Etkinlik, Eğitim</p>
           </div>
           <CrewManagement onNotify={handleNotify} />
+        </CardContent>
+      </Card>
+
+      {/* Ödüllerimiz */}
+      <Card className="bg-gradient-to-br from-card/80 to-card/50 border-yellow-500/20 hover:border-yellow-500/40 transition-all duration-300">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-yellow-500/10">
+              <Trophy className="w-5 h-5 text-yellow-500" />
+            </div>
+            Ödüllerimiz
+          </CardTitle>
+          <CardDescription>Topluluğun aldığı ödül ve başarıları yönetin</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <AwardsManagement onNotify={handleNotify} />
         </CardContent>
       </Card>
     </div>

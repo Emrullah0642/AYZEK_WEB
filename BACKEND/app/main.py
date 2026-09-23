@@ -5,7 +5,6 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.gzip import GZipMiddleware
 from dotenv import load_dotenv
 import logging, os
-from starlette.middleware.sessions import SessionMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
 # --- GÜVENLİK (RATE LIMIT) IMPORTLARI ---
@@ -27,8 +26,8 @@ from app.routers.community import router as community_router
 from app.routers.poster import router as poster_router
 from app.routers.blog import router as blog_router
 from app.routers.admin_auth import router as admin_auth_router
-from app.routers.teams import router as teams_router
 from app.routers.crew import router as crew_router
+from app.routers.awards import router as awards_router
 
 app = FastAPI(title="AYZEK Platform Backend", version="1.0.0")
 
@@ -83,8 +82,8 @@ app.include_router(community_router)
 app.include_router(poster_router)
 app.include_router(blog_router)
 app.include_router(admin_auth_router)  
-app.include_router(teams_router)
 app.include_router(crew_router)
+app.include_router(awards_router)
 
 @app.get("/")
 def root():

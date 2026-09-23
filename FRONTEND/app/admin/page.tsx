@@ -1,29 +1,33 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { AdminLogin } from "@/components/admin/admin-login"
 import { AdminDashboard } from "@/components/admin/admin-dashboard"
 import { api } from "@/lib/api" // <-- ÖNEMLİ: Fetch yerine bunu kullanacağız
+import { useAdmin } from "@/contexts/admin-context"
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const { setIsAdminLoggedIn } = useAdmin()
+
+  // Sayfa yenilendiğinde cookie sayesinde otomatik giriş kontrolü
+  const checkAuth = useCallback(async () => {
+    try {
+      await api.get("/admin/me")
+      setIsAuthenticated(true)
+      setIsAdminLoggedIn(true)
+    } catch (e) {
+      setIsAuthenticated(false)
+      setIsAdminLoggedIn(false)
+    }
+  }, [setIsAdminLoggedIn])
 
   useEffect(() => {
     document.documentElement.classList.add("dark")
     checkAuth()
-  }, [])
-
-  // Sayfa yenilendiğinde cookie sayesinde otomatik giriş kontrolü
-  const checkAuth = async () => {
-    try {
-      await api.get("/admin/me")
-      setIsAuthenticated(true)
-    } catch (e) {
-      setIsAuthenticated(false)
-    }
-  }
+  }, [checkAuth])
 
   const handleLogin = async (credentials: { email: string; password: string; totp_code?: string }) => {
     setIsLoading(true)
@@ -37,6 +41,7 @@ export default function AdminPage() {
 
       if (response.status === 200) {
         setIsAuthenticated(true)
+        setIsAdminLoggedIn(true)
       }
     } catch (err: any) {
       // Axios hata yapısı fetch'ten farklıdır
@@ -64,6 +69,7 @@ export default function AdminPage() {
       console.error("Çıkış hatası", error)
     }
     setIsAuthenticated(false)
+    setIsAdminLoggedIn(false)
     setError("")
     // Çıkış sonrası sayfayı yenilemek cookie temizliği için en garanti yoldur
     window.location.href = "/admin"

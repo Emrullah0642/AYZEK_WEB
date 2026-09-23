@@ -15,7 +15,9 @@ COPY . .
 # Fotoğrafların yükleneceği klasörün varlığından emin olalım
 RUN mkdir -p public/uploads
 
+RUN chmod +x entrypoint.sh
+
 EXPOSE 8000
 
-# Uygulamayı başlatalım
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Container başlarken migration'ları uygula, sonra sunucuyu başlat
+ENTRYPOINT ["./entrypoint.sh"]

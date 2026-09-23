@@ -14,6 +14,7 @@ from app.database import get_db
 # !!! GÜVENLİK İÇİN GEREKLİ IMPORT !!!
 from app.security import get_current_admin
 
+from app.models import Admin
 router = APIRouter(prefix="/timeline", tags=["timeline"])
 
 # Klasör Ayarı
@@ -47,7 +48,7 @@ async def create_timeline_item(
     file: Optional[UploadFile] = File(None), # Dosya seçilirse
     db: Session = Depends(get_db),
     # !!! KİLİT BURADA !!!
-    current_admin: dict = Depends(get_current_admin)
+    current_admin: Admin = Depends(get_current_admin)
 ):
     final_image_url = image_url
 
@@ -92,7 +93,7 @@ async def update_timeline_item(
     file: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
     # !!! KİLİT BURADA !!!
-    current_admin: dict = Depends(get_current_admin)
+    current_admin: Admin = Depends(get_current_admin)
 ):
     obj = get_event(db, event_id)
     if not obj:
@@ -135,7 +136,7 @@ def delete_timeline_item(
     event_id: int, 
     db: Session = Depends(get_db),
     # !!! KİLİT BURADA !!!
-    current_admin: dict = Depends(get_current_admin)
+    current_admin: Admin = Depends(get_current_admin)
 ):
     obj = get_event(db, event_id)
     if not obj:
