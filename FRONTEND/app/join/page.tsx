@@ -100,7 +100,7 @@ export default function JoinPage() {
               return (
                 <ScrollAnimation key={index} animation="scale-up" delay={index * 100}>
                   <Card
-                    className="group relative overflow-hidden hover:shadow-[0_0_30px_-8px_oklch(0.62_0.21_258_/_0.5)] transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 bg-card/70 backdrop-blur-sm border border-foreground/10 h-[250px] sm:h-[270px] md:h-[290px] flex flex-col"
+                    className="group relative overflow-hidden hover:shadow-[0_0_30px_-8px_oklch(0.62_0.21_258_/_0.5)] transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 bg-card/70 backdrop-blur-sm border border-foreground/10 min-h-[220px] sm:min-h-[250px] md:min-h-[270px] flex flex-col"
                   >
                     <div className="absolute inset-x-0 top-0 h-0.5 bg-ayzek-gradient scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
                     <CardHeader className="text-center flex-shrink-0 p-3 sm:p-3.5 md:p-4">

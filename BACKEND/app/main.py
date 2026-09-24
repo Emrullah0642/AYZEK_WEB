@@ -17,10 +17,8 @@ load_dotenv()
 from app.security import hash_password
 
 # Router Importları
-from app.routers.timeline import router as timeline_router
 from app.routers.events import router as events_router
 from app.routers.gallery_events import router as gallery_router
-from app.routers.journey import router as journey_router
 from app.routers.event_suggestions import router as suggestions_router
 from app.routers.community import router as community_router
 from app.routers.poster import router as poster_router
@@ -28,6 +26,7 @@ from app.routers.blog import router as blog_router
 from app.routers.admin_auth import router as admin_auth_router
 from app.routers.crew import router as crew_router
 from app.routers.awards import router as awards_router
+from app.routers.site_content import router as site_content_router
 
 app = FastAPI(title="AYZEK Platform Backend", version="1.0.0")
 
@@ -73,10 +72,8 @@ async def all_exception_handler(request: Request, exc: Exception):
     return JSONResponse(status_code=500, content={"detail": "Internal server error"})
 
 # Router'ları Dahil Et
-app.include_router(timeline_router)
 app.include_router(events_router)
 app.include_router(gallery_router)
-app.include_router(journey_router)
 app.include_router(suggestions_router)
 app.include_router(community_router)
 app.include_router(poster_router)
@@ -84,6 +81,7 @@ app.include_router(blog_router)
 app.include_router(admin_auth_router)  
 app.include_router(crew_router)
 app.include_router(awards_router)
+app.include_router(site_content_router)
 
 @app.get("/")
 def root():

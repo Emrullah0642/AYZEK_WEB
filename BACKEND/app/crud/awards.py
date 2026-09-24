@@ -12,7 +12,7 @@ def get(db: Session, award_id: int) -> Award | None:
 def get_multi(db: Session, skip: int = 0, limit: int = 100) -> Sequence[Award]:
     return (
         db.query(Award)
-        .order_by(Award.order_index.asc().nulls_last(), Award.year.desc().nulls_last(), Award.id.desc())
+        .order_by(Award.order_index.asc().nulls_last(), Award.date.desc().nulls_last(), Award.id.desc())
         .offset(skip)
         .limit(limit)
         .all()
@@ -30,7 +30,8 @@ def create(db: Session, obj_in: AwardCreate) -> Award:
         title=obj_in.title,
         description=obj_in.description,
         image_url=obj_in.image_url,
-        year=obj_in.year,
+        location=obj_in.location,
+        date=obj_in.date,
         order_index=next_idx,
     )
     db.add(db_obj)
@@ -46,8 +47,10 @@ def update(db: Session, db_obj: Award, obj_in: AwardUpdate) -> Award:
         db_obj.description = obj_in.description
     if obj_in.image_url is not None:
         db_obj.image_url = obj_in.image_url
-    if obj_in.year is not None:
-        db_obj.year = obj_in.year
+    if obj_in.location is not None:
+        db_obj.location = obj_in.location
+    if obj_in.date is not None:
+        db_obj.date = obj_in.date
     if obj_in.order_index is not None:
         db_obj.order_index = obj_in.order_index
 

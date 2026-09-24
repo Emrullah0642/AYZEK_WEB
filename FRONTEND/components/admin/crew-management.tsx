@@ -8,7 +8,6 @@ import { Card } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { ImageIcon, Trash2, Edit, Users } from "lucide-react"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 
@@ -38,21 +37,23 @@ type CrewMemberOut = {
   order_index: number
 }
 
-type CrewCategory = "Başkan ve Yardımcılar" | "Sosyal Medya ve Tasarım" | "Etkinlik ve Organizasyon" | "Eğitim ve Proje"
-
-const CREW_CATEGORIES: CrewCategory[] = [
+const CREW_CATEGORIES = [
   "Başkan ve Yardımcılar",
   "Sosyal Medya ve Tasarım",
   "Etkinlik ve Organizasyon",
   "Eğitim ve Proje",
 ]
 
+const OTHER_CATEGORY = "Diğer"
+
 const INITIAL_CREW = { name: "", role: "", description: "", photo_url: "", linkedin_url: "", github_url: "" }
 
 export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }) {
   const [crewMembers, setCrewMembers] = useState<Record<string, CrewMemberOut[]>>({})
   const [loading, setLoading] = useState(true)
-  const [selectedCat, setSelectedCat] = useState<CrewCategory>("Başkan ve Yardımcılar")
+  const [selectedCat, setSelectedCat] = useState<string>("Başkan ve Yardımcılar")
+  const [customCategory, setCustomCategory] = useState("")
+  const effectiveCategory = selectedCat === OTHER_CATEGORY ? customCategory.trim() : selectedCat
   const [isOpen, setIsOpen] = useState(false)
 
   // Ekleme State'leri
@@ -91,13 +92,16 @@ export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }
       onNotify("İsim ve Görev alanları zorunludur")
       return
     }
+    if (!effectiveCategory) {
+      onNotify("Kategori adını yazın")
+      return
+    }
 
     try {
       const formData = new FormData()
       formData.append("name", newCrew.name)
       formData.append("role", newCrew.role)
-      formData.append("category", selectedCat)
-      formData.append("description", newCrew.description)
+      formData.append("category", effectiveCategory)
       formData.append("linkedin_url", newCrew.linkedin_url)
       formData.append("github_url", newCrew.github_url)
 
@@ -137,7 +141,6 @@ export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }
       formData.append("name", editCrew.name)
       formData.append("role", editCrew.role)
       formData.append("category", editCrew.category)
-      formData.append("description", editCrew.description || "")
       formData.append("linkedin_url", editCrew.linkedin_url || "")
       formData.append("github_url", editCrew.github_url || "")
       formData.append("order_index", String(editCrew.order_index))
@@ -233,27 +236,40 @@ export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }
           </div>
         </DialogHeader>
 
-        <div className="flex items-center gap-4 mb-4">
-          <div className="flex-1">
-            <Label>Kategori Seç</Label>
-            <select value={selectedCat} onChange={(e) => setSelectedCat(e.target.value as CrewCategory)} className="w-full h-10 rounded-md border bg-background/50 px-3">
-              {CREW_CATEGORIES.map((c) => (<option key={c} value={c}>{c}</option>))}
-            </select>
+        <div className="flex items-start gap-4 mb-4">
+          <div className="flex-1 space-y-2">
+            <div>
+              <Label>Kategori</Label>
+              <select
+                value={selectedCat}
+                onChange={(e) => setSelectedCat(e.target.value)}
+                className="w-full h-10 rounded-md border bg-background/50 px-3"
+              >
+                {CREW_CATEGORIES.map((c) => (<option key={c} value={c}>{c}</option>))}
+                <option value={OTHER_CATEGORY}>{OTHER_CATEGORY}</option>
+              </select>
+            </div>
+            {selectedCat === OTHER_CATEGORY && (
+              <Input
+                value={customCategory}
+                onChange={(e) => setCustomCategory(e.target.value)}
+                placeholder="Kategori adını yaz"
+              />
+            )}
           </div>
 
           <Dialog open={addOpen} onOpenChange={openAddDialog}>
             <DialogTrigger asChild>
-              <Button className="bg-gradient-to-r from-primary to-accent mt-6">Üye Ekle</Button>
+              <Button className="bg-gradient-to-r from-primary to-accent mt-6" disabled={!effectiveCategory}>Üye Ekle</Button>
             </DialogTrigger>
             <DialogContent className="bg-card border-primary/20 max-w-lg">
               <DialogHeader>
-                <DialogTitle>{selectedCat} — Yeni Üye</DialogTitle>
+                <DialogTitle>{effectiveCategory || "Kategori seç"} — Yeni Üye</DialogTitle>
                 <DialogDescription>Yeni üyenin bilgilerini girin</DialogDescription>
               </DialogHeader>
               <div className="space-y-3">
                 <div><Label>İsim Soyisim *</Label><Input value={newCrew.name} onChange={(e) => setNewCrew(p => ({ ...p, name: e.target.value }))} /></div>
                 <div><Label>Görevi *</Label><Input value={newCrew.role} onChange={(e) => setNewCrew(p => ({ ...p, role: e.target.value }))} /></div>
-                <div><Label>Açıklama (Kısa Konuşma)</Label><Textarea value={newCrew.description} onChange={(e) => setNewCrew(p => ({ ...p, description: e.target.value }))} rows={3} /></div>
 
                 <div>
                   <Label>Fotoğraf (opsiyonel)</Label>
@@ -290,7 +306,7 @@ export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }
           <div className="text-center py-10 text-muted-foreground">Yükleniyor...</div>
         ) : (
           <div className="space-y-6">
-            {CREW_CATEGORIES.filter(cat => crewMembers[cat] && crewMembers[cat].length > 0).map((category) => (
+            {Object.keys(crewMembers).filter(cat => crewMembers[cat]?.length > 0).map((category) => (
               <div key={category} className="space-y-3">
                 <h3 className="text-lg font-semibold">{category}</h3>
                 <div className="grid gap-3">
@@ -334,7 +350,6 @@ export function CrewManagement({ onNotify }: { onNotify: (msg: string) => void }
               <div className="space-y-3">
                 <div><Label>İsim Soyisim</Label><Input value={editCrew.name} onChange={(e) => setEditCrew({ ...editCrew, name: e.target.value })} /></div>
                 <div><Label>Görevi</Label><Input value={editCrew.role} onChange={(e) => setEditCrew({ ...editCrew, role: e.target.value })} /></div>
-                <div><Label>Açıklama</Label><Textarea value={editCrew.description ?? ""} onChange={(e) => setEditCrew({ ...editCrew, description: e.target.value })} /></div>
 
                 <div>
                   <Label>Fotoğraf URL</Label>

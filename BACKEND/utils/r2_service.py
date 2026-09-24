@@ -1,7 +1,7 @@
 import boto3
 import os
 import logging
-from PIL import Image
+from PIL import Image, ImageOps
 import io
 
 logger = logging.getLogger("uvicorn.error")
@@ -17,6 +17,9 @@ def upload_file_to_r2(file_obj, filename, content_type):
         if content_type and content_type.startswith("image/"):
             image_data = file_obj.read()
             img = Image.open(io.BytesIO(image_data))
+            # Telefon kameralarının EXIF döndürme bilgisini piksellere işle
+            # (yoksa örn. dikey çekilen fotoğraf yatık/yanlamasına görünür)
+            img = ImageOps.exif_transpose(img)
             max_size = (1920, 1920)
             img.thumbnail(max_size, Image.LANCZOS)
             if img.mode in ("RGBA", "P"):

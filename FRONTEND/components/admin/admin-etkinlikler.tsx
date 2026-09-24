@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Calendar as LucideCalendar, Clock, Trash2, Plus, Upload, Eye, CheckCircle, XCircle, Lightbulb } from "lucide-react";
+import { Calendar as LucideCalendar, Clock, Trash2, Plus, Upload, Eye, CheckCircle, XCircle, Lightbulb, Pencil } from "lucide-react";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -31,6 +31,8 @@ interface BackendEvent {
   registered?: number;      // Katılımcı sayısı
   capacity: number;         // Kapasite
   tags?: string;            // Virgülle ayrılmış string
+  category?: string;
+  whatsapp_link?: string;
 }
 
 // Frontend'de kullandığımız format
@@ -45,6 +47,8 @@ export interface EventItem {
   attendees: number;
   max_attendees: number;
   tags: string[];
+  category: string;
+  registration_link: string;
 }
 
 export interface EventSuggestion {
@@ -79,12 +83,18 @@ const mapBackendToFrontend = (ev: BackendEvent): EventItem => {
     title: ev.title,
     description: ev.description,
     image_url: ev.cover_image_url || ev.image_url,
-    date: isValidDate ? startDate.toISOString().split("T")[0] : "",
+    // Yerel (tarayıcı) tarih bileşenlerinden oluşturulur — toISOString() burada kullanılmaz,
+    // çünkü UTC'ye çevirirken gece yarısına yakın saatlerde günü bir öne/geriye kaydırıyordu.
+    date: isValidDate
+      ? `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, "0")}-${String(startDate.getDate()).padStart(2, "0")}`
+      : "",
     time: isValidDate ? startDate.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" }) : "",
     location: ev.location,
     attendees: ev.registered ?? 0,
     max_attendees: ev.capacity,
     tags: ev.tags ? ev.tags.split(",").map(t => t.trim()).filter(t => t) : [],
+    category: ev.category || "",
+    registration_link: ev.whatsapp_link || "",
   };
 };
 
@@ -124,6 +134,7 @@ export default function EventsTab({ onNotify }: { onNotify: (msg: string) => voi
 
   // Form State
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingEventId, setEditingEventId] = useState<number | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState("");
@@ -181,8 +192,8 @@ export default function EventsTab({ onNotify }: { onNotify: (msg: string) => voi
     }
   };
 
-  // --- EKLEME İŞLEMİ ---
-  const handleAddEvent = async () => {
+  // --- EKLEME / GÜNCELLEME İŞLEMİ ---
+  const handleSubmitEvent = async () => {
     if (!title || !description || !date || !time || !location) {
       alert("Lütfen zorunlu alanları doldurun.");
       return;
@@ -198,6 +209,7 @@ export default function EventsTab({ onNotify }: { onNotify: (msg: string) => voi
       formData.append("max_attendees", String(maxAttendees));
       formData.append("category", category);
       formData.append("tags", tags);
+      if (whatsappLink) formData.append("registration_link", whatsappLink);
 
       if (imageFile) {
         formData.append("file", imageFile);
@@ -205,26 +217,33 @@ export default function EventsTab({ onNotify }: { onNotify: (msg: string) => voi
         formData.append("image_url", normalizeImageUrl(image));
       }
 
-      // Backend'e gönder
-      const { data } = await api.post<BackendEvent>("/events", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      // Dönen veriyi Frontend formatına çevirip listeye ekle
-      const newEvent = mapBackendToFrontend(data);
-      setEvents((prev) => [newEvent, ...prev]);
+      if (editingEventId) {
+        const { data } = await api.put<BackendEvent>(`/events/${editingEventId}`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        const updatedEvent = mapBackendToFrontend(data);
+        setEvents((prev) => prev.map((e) => (e.id === editingEventId ? updatedEvent : e)));
+        onNotify("Etkinlik başarıyla güncellendi.");
+      } else {
+        const { data } = await api.post<BackendEvent>("/events", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        const newEvent = mapBackendToFrontend(data);
+        setEvents((prev) => [newEvent, ...prev]);
+        onNotify("Etkinlik başarıyla oluşturuldu.");
+      }
 
       resetForm();
       setIsDialogOpen(false);
-      onNotify("Etkinlik başarıyla oluşturuldu.");
 
     } catch (e) {
-      console.error("Etkinlik ekleme hatası:", e);
-      onNotify("Etkinlik eklenirken bir hata oluştu.");
+      console.error("Etkinlik kaydetme hatası:", e);
+      onNotify(editingEventId ? "Etkinlik güncellenirken bir hata oluştu." : "Etkinlik eklenirken bir hata oluştu.");
     }
   };
 
   const resetForm = () => {
+    setEditingEventId(null);
     setTitle("");
     setDescription("");
     setImage("");
@@ -236,6 +255,22 @@ export default function EventsTab({ onNotify }: { onNotify: (msg: string) => voi
     setCategory("");
     setTags("");
     setWhatsappLink("");
+  };
+
+  const openEditDialog = (event: EventItem) => {
+    setEditingEventId(event.id);
+    setTitle(event.title);
+    setDescription(event.description || "");
+    setImage(event.image_url || "");
+    setImageFile(null);
+    setDate(event.date);
+    setTime(event.time);
+    setLocation(event.location);
+    setMaxAttendees(event.max_attendees);
+    setCategory(event.category);
+    setTags(event.tags.join(", "));
+    setWhatsappLink(event.registration_link);
+    setIsDialogOpen(true);
   };
 
   // --- SİLME İŞLEMİ ---
@@ -298,17 +333,28 @@ export default function EventsTab({ onNotify }: { onNotify: (msg: string) => voi
                 <CardTitle className="text-2xl">Etkinlik Yönetimi</CardTitle>
                 <CardDescription className="mt-2">Topluluk etkinliklerini oluşturun ve yönetin</CardDescription>
               </div>
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <Dialog
+                open={isDialogOpen}
+                onOpenChange={(open) => {
+                  setIsDialogOpen(open);
+                  if (!open) resetForm();
+                }}
+              >
                 <DialogTrigger asChild>
-                  <Button className="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity">
+                  <Button
+                    className="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity"
+                    onClick={() => resetForm()}
+                  >
                     <Plus className="w-4 h-4 mr-2" />
                     Yeni Etkinlik
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
-                    <DialogTitle>Yeni Etkinlik Ekle</DialogTitle>
-                    <DialogDescription>Topluluk için yeni bir etkinlik oluşturun</DialogDescription>
+                    <DialogTitle>{editingEventId ? "Etkinliği Düzenle" : "Yeni Etkinlik Ekle"}</DialogTitle>
+                    <DialogDescription>
+                      {editingEventId ? "Etkinlik bilgilerini güncelleyin" : "Topluluk için yeni bir etkinlik oluşturun"}
+                    </DialogDescription>
                   </DialogHeader>
 
                   <div className="grid gap-4 py-4">
@@ -364,12 +410,26 @@ export default function EventsTab({ onNotify }: { onNotify: (msg: string) => voi
                       <Label htmlFor="tags">Etiketler (Virgülle ayırın)</Label>
                       <Input id="tags" value={tags} onChange={(e) => setTags(e.target.value)} placeholder="AI, Machine Learning, Python" />
                     </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="whatsappLink">Başvuru linki</Label>
+                      <Input
+                        id="whatsappLink"
+                        value={whatsappLink}
+                        onChange={(e) => setWhatsappLink(e.target.value)}
+                        placeholder="Örn: WhatsApp grubu, form veya kayıt linki"
+                      />
+                    </div>
                   </div>
 
                   <DialogFooter className="gap-2">
                     <Button variant="outline" onClick={() => setIsDialogOpen(false)}>İptal</Button>
-                    <Button onClick={handleAddEvent} className="bg-gradient-to-r from-primary to-accent">
-                      <Plus className="w-4 h-4 mr-2" /> Etkinlik Ekle
+                    <Button onClick={handleSubmitEvent} className="bg-gradient-to-r from-primary to-accent">
+                      {editingEventId ? (
+                        <><Pencil className="w-4 h-4 mr-2" /> Değişiklikleri Kaydet</>
+                      ) : (
+                        <><Plus className="w-4 h-4 mr-2" /> Etkinlik Ekle</>
+                      )}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
@@ -424,6 +484,14 @@ export default function EventsTab({ onNotify }: { onNotify: (msg: string) => voi
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => openEditDialog(event)}
+                              className="text-primary hover:bg-primary/10"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </Button>
                             <Button
                               variant="ghost"
                               size="sm"

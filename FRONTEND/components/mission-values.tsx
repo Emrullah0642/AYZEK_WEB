@@ -83,7 +83,7 @@ export function MissionValues() {
         </div>
 
         {/* Bento grid — bir büyük vurgu kartı + beş küçük kart */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-2 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-3 lg:grid-rows-2 gap-3 sm:gap-4">
           {values.map((value, index) => {
             const Icon = value.icon
             if (value.big) {
@@ -91,7 +91,7 @@ export function MissionValues() {
                 <ScrollAnimation
                   key={index}
                   animation="fade-up"
-                  className="lg:col-span-2 lg:row-span-2"
+                  className="col-span-2 lg:row-span-2"
                 >
                   <div className="group relative h-full min-h-[220px] rounded-2xl border border-white/[0.08] bg-[#0D1726] p-6 sm:p-8 flex flex-col justify-between overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-[#22D3EE]/30">
                     {/* sağ altta çok hafif bağlantı noktaları */}
@@ -127,8 +127,8 @@ export function MissionValues() {
                     <Icon strokeWidth={1.5} className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-display font-semibold text-sm sm:text-base text-foreground mb-1">{value.title}</h3>
-                    <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">{value.description}</p>
+                    <h3 className="font-display font-semibold text-base sm:text-lg text-foreground mb-1">{value.title}</h3>
+                    <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">{value.description}</p>
                   </div>
                 </div>
               </ScrollAnimation>

@@ -17,11 +17,12 @@ type AwardOut = {
   title: string
   description: string
   image_url: string | null
-  year: number | null
+  location: string | null
+  date: string | null
   order_index: number | null
 }
 
-const INITIAL_AWARD = { title: "", description: "", year: "", image_url: "" }
+const INITIAL_AWARD = { title: "", description: "", location: "", date: "", image_url: "" }
 
 export function AwardsManagement({ onNotify }: { onNotify: (msg: string) => void }) {
   const [awards, setAwards] = useState<AwardOut[]>([])
@@ -62,7 +63,8 @@ export function AwardsManagement({ onNotify }: { onNotify: (msg: string) => void
       const formData = new FormData()
       formData.append("title", newAward.title)
       formData.append("description", newAward.description)
-      if (newAward.year) formData.append("year", newAward.year)
+      if (newAward.location) formData.append("location", newAward.location)
+      if (newAward.date) formData.append("date", newAward.date)
 
       if (awardFile) {
         formData.append("file", awardFile)
@@ -91,7 +93,8 @@ export function AwardsManagement({ onNotify }: { onNotify: (msg: string) => void
       const formData = new FormData()
       formData.append("title", editAward.title)
       formData.append("description", editAward.description)
-      if (editAward.year != null) formData.append("year", String(editAward.year))
+      if (editAward.location != null) formData.append("location", editAward.location)
+      if (editAward.date != null) formData.append("date", editAward.date)
 
       if (awardFile) {
         formData.append("file", awardFile)
@@ -188,8 +191,12 @@ export function AwardsManagement({ onNotify }: { onNotify: (msg: string) => void
                   <Textarea value={newAward.description} onChange={(e) => setNewAward((p) => ({ ...p, description: e.target.value }))} rows={3} />
                 </div>
                 <div>
-                  <Label>Yıl</Label>
-                  <Input type="number" value={newAward.year} onChange={(e) => setNewAward((p) => ({ ...p, year: e.target.value }))} placeholder="Örn: 2025" />
+                  <Label>Konum</Label>
+                  <Input value={newAward.location} onChange={(e) => setNewAward((p) => ({ ...p, location: e.target.value }))} placeholder="Örn: İstanbul" />
+                </div>
+                <div>
+                  <Label>Tarih</Label>
+                  <Input type="date" value={newAward.date} onChange={(e) => setNewAward((p) => ({ ...p, date: e.target.value }))} />
                 </div>
 
                 <div>
@@ -248,10 +255,11 @@ export function AwardsManagement({ onNotify }: { onNotify: (msg: string) => void
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <h4 className="font-semibold">{award.title}</h4>
-                      {award.year && <span className="text-xs text-muted-foreground">({award.year})</span>}
+                      {award.date && <span className="text-xs text-muted-foreground">({award.date})</span>}
                     </div>
+                    {award.location && <p className="text-xs text-muted-foreground mt-0.5">{award.location}</p>}
                     <p className="text-sm mt-1 break-words whitespace-pre-wrap text-muted-foreground">{award.description}</p>
                   </div>
                   <div className="flex gap-2 flex-shrink-0">
@@ -280,11 +288,19 @@ export function AwardsManagement({ onNotify }: { onNotify: (msg: string) => void
                   <Textarea value={editAward.description} onChange={(e) => setEditAward({ ...editAward, description: e.target.value })} rows={3} />
                 </div>
                 <div>
-                  <Label>Yıl</Label>
+                  <Label>Konum</Label>
                   <Input
-                    type="number"
-                    value={editAward.year ?? ""}
-                    onChange={(e) => setEditAward({ ...editAward, year: e.target.value ? Number(e.target.value) : null })}
+                    value={editAward.location ?? ""}
+                    onChange={(e) => setEditAward({ ...editAward, location: e.target.value })}
+                    placeholder="Örn: İstanbul"
+                  />
+                </div>
+                <div>
+                  <Label>Tarih</Label>
+                  <Input
+                    type="date"
+                    value={editAward.date ?? ""}
+                    onChange={(e) => setEditAward({ ...editAward, date: e.target.value })}
                   />
                 </div>
 

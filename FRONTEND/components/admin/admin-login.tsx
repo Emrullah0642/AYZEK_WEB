@@ -31,7 +31,9 @@ export function AdminLogin({ onLogin, isLoading = false, error: propError }: Adm
   const [totpCode, setTotpCode] = useState("")
   
   const [showErrorDialog, setShowErrorDialog] = useState(false)
-  const [isPluggedIn, setIsPluggedIn] = useState(false)
+  // Giriş formu baştan görünür olsun — "fişi tak" animasyonu dekoratif kalsın,
+  // kritik işlevselliği (e-posta/şifre alanları) bir tıklamanın arkasına gizlemesin.
+  const [isPluggedIn, setIsPluggedIn] = useState(true)
   const [showSparkles, setShowSparkles] = useState(false)
   
   // Yerel hata state'i
