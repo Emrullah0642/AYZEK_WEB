@@ -3,11 +3,9 @@
 import { useState } from "react"
 import { useAdmin } from "@/contexts/admin-context"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Home, Clock, Images, Users, UsersIcon, Trophy } from "lucide-react"
+import { Home, Images, UsersIcon, Trophy } from "lucide-react"
 import { PosterManagement } from "@/components/admin/poster-management"
-import { TimelineManagement } from "@/components/admin/timeline-management"
 import { GalleryManagement } from "@/components/admin/gallery-management"
-import { JourneyManagement } from "@/components/admin/journey-management"
 import { CrewManagement } from "@/components/admin/crew-management"
 import { AwardsManagement } from "@/components/admin/awards-management"
 
@@ -16,7 +14,13 @@ export default function ContentManagementTab() {
 
 
   const handleNotify = (message: string) => {
-    addNotification({ type: "system", title: "Başarılı", message, read: false })
+    const isError = /hata|başarısız|yetkiniz yok|seçin/i.test(message)
+    addNotification({
+      type: "system",
+      title: isError ? "Hata" : "Başarılı",
+      message,
+      read: false,
+    })
   }
 
   return (
@@ -37,22 +41,6 @@ export default function ContentManagementTab() {
         </CardContent>
       </Card>
 
-      {/* Anasayfa Zaman Kapsülü */}
-      <Card className="bg-gradient-to-br from-card/80 to-card/50 border-primary/20 hover:border-primary/40 transition-all duration-300">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-accent/10">
-              <Clock className="w-5 h-5 text-accent" />
-            </div>
-            Anasayfa Zaman Kapsülü
-          </CardTitle>
-          <CardDescription>Timeline etkinliklerini ve kilometre taşlarını yönetin</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <TimelineManagement onNotify={handleNotify} />
-        </CardContent>
-      </Card>
-
       {/* Etkinlik Galerisi */}
       <Card className="bg-gradient-to-br from-card/80 to-card/50 border-orange-500/20 hover:border-orange-500/40 transition-all duration-300">
         <CardHeader>
@@ -66,25 +54,6 @@ export default function ContentManagementTab() {
         </CardHeader>
         <CardContent className="space-y-4">
           <GalleryManagement onNotify={handleNotify} />
-        </CardContent>
-      </Card>
-
-      {/* Yolculuğumuz */}
-      <Card className="bg-gradient-to-br from-card/80 to-card/50 border-blue-500/20 hover:border-blue-500/40 transition-all duration-300">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-blue-500/10">
-              <Users className="w-5 h-5 text-blue-500" />
-            </div>
-            Yolculuğumuz
-          </CardTitle>
-          <CardDescription>Yıl seçip o yıla ait kişileri (yönetim vb.) ekleyin</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="px-3 py-2 rounded-lg bg-muted/50">
-            <p className="text-sm text-muted-foreground">Yıl seçerek kişi ekleyip düzenleyin</p>
-          </div>
-          <JourneyManagement onNotify={handleNotify} />
         </CardContent>
       </Card>
 

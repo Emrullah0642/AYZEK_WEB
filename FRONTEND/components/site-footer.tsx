@@ -39,7 +39,7 @@ export function SiteFooter() {
               </div>
               <span className="text-lg sm:text-xl font-display font-bold text-foreground">AYZEK</span>
             </div>
-            <p className="text-muted-foreground text-center max-w-md text-xs sm:text-sm md:text-base px-2">
+            <p className="text-muted-foreground text-center max-w-md text-sm sm:text-base md:text-lg px-2">
               Anılar inşa ediyor, bağlantıları güçlendiriyor ve geleceği birlikte yaratıyoruz.
             </p>
             <div className="flex items-center gap-2 sm:gap-3">
@@ -49,7 +49,7 @@ export function SiteFooter() {
                   href={s.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="grid place-items-center size-9 border border-foreground/15 text-muted-foreground hover:text-primary-foreground hover:bg-primary hover:border-primary transition-colors"
+                  className="grid place-items-center size-11 sm:size-9 border border-foreground/15 text-muted-foreground hover:text-primary-foreground hover:bg-primary hover:border-primary transition-colors"
                   aria-label={s.label}
                 >
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -58,12 +58,12 @@ export function SiteFooter() {
                 </a>
               ))}
             </div>
-            <div className="text-xs sm:text-sm text-muted-foreground">
+            <div className="text-sm sm:text-base text-muted-foreground">
               <a href="mailto:ayzekselcukuni@gmail.com" className="hover:text-primary transition-colors">
                 ayzekselcukuni@gmail.com
               </a>
             </div>
-            <p className="text-[10px] sm:text-xs text-muted-foreground/60 pt-1">
+            <p className="text-xs sm:text-sm text-muted-foreground/60 pt-1">
               © {new Date().getFullYear()} AYZEK. Tüm hakları saklıdır.
             </p>
           </div>

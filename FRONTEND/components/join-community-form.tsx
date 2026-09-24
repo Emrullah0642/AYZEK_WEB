@@ -18,8 +18,7 @@ export function JoinCommunityForm() {
         <div className="w-full overflow-hidden rounded-lg sm:rounded-xl">
           <iframe
             src="https://forms.gle/9jLTrgpc5uSZCuVu8"
-            className="w-full"
-            height={950}
+            className="w-full h-[1700px] sm:h-[1400px] md:h-[1150px] lg:h-[950px]"
             frameBorder="0"
             marginHeight={0}
             marginWidth={0}

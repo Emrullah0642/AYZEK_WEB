@@ -1,15 +1,10 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
-import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Users, MapPin } from "lucide-react"
+import { Calendar, Users, MapPin, ChevronLeft, ChevronRight } from "lucide-react"
 import { api, API_BASE } from "@/lib/api"
 import Image from "next/image"
-import { ScrollAnimation } from "@/components/scroll-animations"
-
-// --- YENİ EKLENEN KISIMLAR ---
-
 
 const normalizeImageUrl = (v: string | null | undefined) => {
   const s = (v || "").trim()
@@ -29,7 +24,6 @@ const normalizeImageUrl = (v: string | null | undefined) => {
   // 4. Fallback: Diğer durumlar için varsayılan olarak backend'e yönlendir (eski formatlar için)
   return `${API_BASE}/public/uploads${path}`
 }
-// -----------------------------
 
 type GalleryEvent = {
   id: number
@@ -52,13 +46,37 @@ function fmtTRDate(d: string) {
   })
 }
 
+// Aktif karttan uzaklığa göre 3D coverflow dönüşümü
+function cardStyle(offset: number): React.CSSProperties {
+  const abs = Math.abs(offset)
+  if (abs > 3) {
+    return { transform: "translateX(0) scale(0)", opacity: 0, zIndex: 0, pointerEvents: "none" }
+  }
+  const dir = Math.sign(offset)
+  const translateX = offset * 44 // % cinsinden, konteynere göre
+  const translateZ = -abs * 120
+  const rotateY = -dir * Math.min(abs * 38, 50)
+  const scale = 1 - abs * 0.14
+  const opacity = 1 - abs * 0.28
+
+  return {
+    transform: `translateX(${translateX}%) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${Math.max(scale, 0.55)})`,
+    opacity: Math.max(opacity, 0.15),
+    zIndex: 10 - abs,
+    pointerEvents: abs === 0 ? "auto" : "auto",
+  }
+}
+
 export default function EventGallery() {
   const [items, setItems] = useState<GalleryEvent[]>([])
-  const [hoveredId, setHoveredId] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const [activeIndex, setActiveIndex] = useState(0)
+
+  // sürükle/kaydır
+  const [dragging, setDragging] = useState(false)
+  const startX = useRef(0)
+  const deltaX = useRef(0)
 
   useEffect(() => {
     let alive = true
@@ -80,27 +98,42 @@ export default function EventGallery() {
     }
   }, [])
 
-  // Scroll pozisyonunu takip et
-  useEffect(() => {
-    const container = scrollContainerRef.current
-    if (!container || items.length === 0) return
+  const goTo = (index: number) => {
+    if (!items.length) return
+    setActiveIndex(Math.max(0, Math.min(index, items.length - 1)))
+  }
+  const goPrev = () => goTo(activeIndex - 1)
+  const goNext = () => goTo(activeIndex + 1)
 
-    const handleScroll = () => {
-      const scrollLeft = container.scrollLeft
-      const itemWidth = container.scrollWidth / items.length
-      const index = Math.round(scrollLeft / itemWidth)
-      setCurrentIndex(Math.max(0, Math.min(index, items.length - 1)))
+  const onPointerDown: React.PointerEventHandler<HTMLDivElement> = (e) => {
+    if ((e.target as HTMLElement).closest("button")) return
+    if (e.button !== 0 && e.pointerType === "mouse") return
+    startX.current = e.clientX
+    deltaX.current = 0
+    setDragging(true)
+    ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+  }
+  const onPointerMove: React.PointerEventHandler<HTMLDivElement> = (e) => {
+    if (!dragging) return
+    deltaX.current = e.clientX - startX.current
+  }
+  const onPointerUp: React.PointerEventHandler<HTMLDivElement> = (e) => {
+    if (!dragging) return
+    const dx = deltaX.current
+    setDragging(false)
+    ;(e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId)
+    const THRESH = 50
+    if (Math.abs(dx) >= THRESH) {
+      if (dx < 0) goNext()
+      else goPrev()
     }
+    deltaX.current = 0
+  }
 
-    container.addEventListener("scroll", handleScroll)
-    return () => container.removeEventListener("scroll", handleScroll)
-  }, [items.length])
-
-  const scrollToIndex = (index: number) => {
-    const container = scrollContainerRef.current
-    if (!container) return
-    const itemWidth = container.scrollWidth / items.length
-    container.scrollTo({ left: itemWidth * index, behavior: "smooth" })
+  // Klavye ile gezinme
+  const onKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
+    if (e.key === "ArrowLeft") goPrev()
+    if (e.key === "ArrowRight") goNext()
   }
 
   if (loading) return <div className="text-center text-sm sm:text-base py-8">Yükleniyor…</div>
@@ -108,113 +141,134 @@ export default function EventGallery() {
   if (!items.length) return <div className="text-muted-foreground text-center text-sm sm:text-base py-8">Henüz galeri yok.</div>
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div
-        ref={scrollContainerRef}
-        className="
-          flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 -mx-4 px-4
-          md:mx-0 md:px-0 md:overflow-visible md:snap-none
-          md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6
-          scrollbar-hide
-        "
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        className="relative h-[260px] sm:h-[320px] md:h-[380px] overflow-hidden select-none touch-pan-y"
+        style={{ perspective: "1400px" }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+        onKeyDown={onKeyDown}
+        tabIndex={0}
+        role="group"
+        aria-label="Etkinlik galerisi"
       >
-        {items.map((photo, index) => (
-          <ScrollAnimation
-            key={photo.id}
-            animation="scale-up"
-            delay={(index % 6) * 80}
-            className="flex-none w-[85vw] sm:w-[70vw] snap-center md:w-auto"
-          >
-          <div
-            className="relative group cursor-pointer"
-            onMouseEnter={() => setHoveredId(photo.id)}
-            onMouseLeave={() => setHoveredId(null)}
-          >
-            <div className="relative overflow-hidden rounded-lg aspect-[4/3] bg-muted">
-              {/* next/image ile optimize edilmiş resim */}
-              <Image
-                src={normalizeImageUrl(photo.image_url) || "/placeholder.svg"}
-                alt={photo.title}
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
-                priority={index < 3}
-                quality={60}
-              />
+        {items.map((photo, index) => {
+          const offset = index - activeIndex
+          if (Math.abs(offset) > 3) return null
+          const isActive = offset === 0
+          return (
+            <div
+              key={photo.id}
+              className={[
+                "absolute top-0 left-1/2 w-[62vw] sm:w-[280px] md:w-[320px] h-full -ml-[31vw] sm:-ml-[140px] md:-ml-[160px]",
+                "transition-[transform,opacity] duration-500 ease-out",
+                isActive ? "cursor-default" : "cursor-pointer",
+              ].join(" ")}
+              style={cardStyle(offset)}
+              onClick={() => !isActive && goTo(index)}
+            >
+              {isActive ? (
+                <div className="flip-card-scene w-full h-full" tabIndex={0}>
+                  <div className="flip-card-inner rounded-xl shadow-2xl">
+                    {/* Ön yüz: fotoğraf */}
+                    <div className="flip-card-face flip-card-front rounded-xl overflow-hidden bg-muted ring-1 ring-[#22D3EE]/40">
+                      <Image
+                        src={normalizeImageUrl(photo.image_url) || "/placeholder.svg"}
+                        alt={photo.title}
+                        fill
+                        sizes="(max-width: 640px) 62vw, 320px"
+                        className="object-cover"
+                        priority
+                        quality={70}
+                      />
+                      <div className="absolute top-2 sm:top-3 left-2 sm:left-3">
+                        <Badge variant="secondary" className="bg-background/90 text-foreground text-[10px] sm:text-xs">
+                          {photo.category}
+                        </Badge>
+                      </div>
+                    </div>
 
-              {/* Kategori rozeti */}
-              <div className="absolute top-2 sm:top-3 md:top-4 left-2 sm:left-3 md:left-4">
-                <Badge variant="secondary" className="bg-background/90 text-foreground text-[10px] sm:text-xs">
-                  {photo.category}
-                </Badge>
-              </div>
-
-              {/* Hover paneli: desktopta görünür, mobilde hover olmadığı için gizli kalır */}
-              {hoveredId === photo.id && (
-                <div className="absolute inset-0 flex items-end p-0 animate-fade-in">
-                  <Card
-                    className="
-                    w-full
-                    h-[70%] md:h-[75%]
-                    bg-black/85
-                    border border-white/10
-                    pointer-events-auto
-                    rounded-t-none md:rounded-t-lg
-                  "
-                  >
-                    <CardContent className="p-4 sm:p-5 md:p-6 h-full overflow-y-auto">
-                      <h3 className="font-semibold text-base sm:text-lg mb-2 sm:mb-3 text-white">
-                        {photo.title}
-                      </h3>
-
-                      <p className="text-xs sm:text-sm text-white/90 mb-3 sm:mb-4 line-clamp-4 sm:line-clamp-5 md:line-clamp-8">
+                    {/* Arka yüz: detaylar — metin uzun olsa da burada yer var */}
+                    <div className="flip-card-face flip-card-back rounded-xl border border-[#22D3EE]/30 bg-[#0D1726] p-4 sm:p-5 flex flex-col overflow-y-auto">
+                      <Badge variant="secondary" className="self-start bg-[#22D3EE]/10 text-[#22D3EE] border-0 text-[10px] sm:text-xs mb-2">
+                        {photo.category}
+                      </Badge>
+                      <h3 className="font-semibold text-base sm:text-lg text-white mb-2">{photo.title}</h3>
+                      <p className="text-sm sm:text-base text-white/70 leading-relaxed mb-3 flex-1">
                         {photo.description}
                       </p>
-
-                      <div className="flex flex-wrap gap-2 sm:gap-3 md:gap-4 text-[10px] sm:text-xs text-white/80">
+                      <div className="flex flex-wrap gap-2 sm:gap-3 text-[10px] sm:text-xs text-white/60 pt-2 border-t border-white/10">
                         <div className="flex items-center gap-1">
                           <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                           <span>{fmtTRDate(photo.date)}</span>
                         </div>
-
                         {typeof photo.participants === "number" && (
                           <div className="flex items-center gap-1">
                             <Users className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                             <span>{photo.participants} kişi</span>
                           </div>
                         )}
-
                         <div className="flex items-center gap-1">
                           <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                           <span>{photo.location}</span>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="relative w-full h-full rounded-xl overflow-hidden bg-muted shadow-2xl ring-1 ring-white/[0.06]">
+                  <Image
+                    src={normalizeImageUrl(photo.image_url) || "/placeholder.svg"}
+                    alt={photo.title}
+                    fill
+                    sizes="(max-width: 640px) 62vw, 320px"
+                    className="object-cover"
+                    priority={Math.abs(offset) <= 1}
+                    quality={70}
+                  />
+                  <div className="absolute top-2 sm:top-3 left-2 sm:left-3">
+                    <Badge variant="secondary" className="bg-background/90 text-foreground text-[10px] sm:text-xs">
+                      {photo.category}
+                    </Badge>
+                  </div>
                 </div>
               )}
             </div>
-          </div>
-          </ScrollAnimation>
-        ))}
+          )
+        })}
+
+        {/* Ok navigasyonu */}
+        {items.length > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={goPrev}
+              disabled={activeIndex === 0}
+              aria-label="Önceki"
+              className="absolute left-0 sm:left-2 top-1/2 -translate-y-1/2 z-20 inline-flex items-center justify-center w-11 h-11 sm:w-10 sm:h-10 rounded-full bg-background/80 border border-foreground/15 hover:border-primary/50 backdrop-blur-sm transition disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <button
+              type="button"
+              onClick={goNext}
+              disabled={activeIndex === items.length - 1}
+              aria-label="Sonraki"
+              className="absolute right-0 sm:right-2 top-1/2 -translate-y-1/2 z-20 inline-flex items-center justify-center w-11 h-11 sm:w-10 sm:h-10 rounded-full bg-background/80 border border-foreground/15 hover:border-primary/50 backdrop-blur-sm transition disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </>
+        )}
       </div>
 
-      {/* Nokta navigasyonu - sadece mobilde göster */}
+      {/* Sayaç */}
       {items.length > 1 && (
-        <div className="flex justify-center gap-2 md:hidden">
-          {items.map((_, index) => (
-            <button
-              key={index}
-              type="button"
-              onClick={() => scrollToIndex(index)}
-              className={`
-                w-2 h-2 rounded-full transition-all duration-300
-                ${index === currentIndex ? "bg-primary scale-125" : "bg-muted-foreground/40"}
-              `}
-              aria-label={`${index + 1}. etkinliğe git`}
-            />
-          ))}
+        <div className="text-center text-xs text-muted-foreground">
+          {activeIndex + 1} / {items.length}
         </div>
       )}
     </div>

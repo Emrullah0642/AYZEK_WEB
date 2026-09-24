@@ -6,14 +6,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { AutoSlidingBanner } from "@/components/anasayfa-poster";
 import { ScrollAnimation } from "@/components/scroll-animations";
-import { ParallaxSection } from "@/components/parallax-section";
-import { HorizontalTimeline } from "@/components/horizontal-timeline";
 import EventGallery from "@/components/event-gallery";
 import { EventsCalendar, type Event } from "@/components/events-calendar";
 import { CrewSection } from "@/components/crew-section";
 import { AwardsSection } from "@/components/awards-section";
 import { MissionValues } from "@/components/mission-values";
-import { CommunityJourney } from "@/components/community-journey";
 import { AdminNavbar } from "@/components/navbar";
 import { InlineEditWrapper } from "@/components/admin/admin-inline-edit-wrapper";
 import { ContentEditModal } from "@/components/content-edit-modal";
@@ -36,8 +33,124 @@ import { KineticHeading } from "@/components/kinetic-heading";
 import { MagneticButton } from "@/components/magnetic-button";
 import { SiteFooter } from "@/components/site-footer";
 import { toast } from "sonner";
-import { API_BASE } from "@/lib/api";
+import { api, API_BASE } from "@/lib/api";
 import { normalizeImageUrl } from "@/lib/normalize-image-url";
+
+// --- Anasayfadaki düzenlenebilir metinler: DB'de (site_content) yoksa bu varsayılanlar kullanılır ---
+const DEFAULT_CONTENT: Record<string, string> = {
+  hero_title: "Teknolojiyi birlikte öğreniyor,\nüretiyoruz.",
+  hero_subtitle:
+    "AYZEK; hackathonlardan açık kaynağa, atölyelerden networking etkinliklerine kadar teknoloji tutkunlarını bir araya getiren, Selçuk Üniversitesi teknoloji topluluğu. Birlikte öğreniyor, birlikte üretiyor, birlikte büyüyoruz.",
+  hero_cta_primary: "Topluluğa katıl",
+  hero_cta_secondary: "Etkinlikleri gör",
+  about_title: "Hakkımızda",
+  about_description:
+    "AYZEK, teknoloji tutkunu bireylerden oluşan bir topluluktur. Birlikte öğrenir, gelişir ve geleceği şekillendiririz.",
+  about_extra:
+    "Hackathonlardan açık kaynağa, atölyelerden networking etkinliklerine kadar birlikte öğreniyor, birlikte üretiyoruz. Herkesin fikrini özgürce paylaşabildiği, birbirinden öğrenmenin normalleştiği bir ortam kuruyoruz — deneyim seviyesi fark etmeksizin.",
+  awards_title: "Ödüllerimiz",
+  awards_description:
+    "Topluluğumuzun ve üyelerimizin yarışmalarda, hackathonlarda ve etkinliklerde kazandığı ödüller ve elde ettiği başarılar.",
+  events_title: "Topluluk etkinlikleri",
+  events_description:
+    "Teknoloji topluluğumuzu ilham vermeye, eğitmeye ve birbirine bağlamaya yönelik tasarlanmış atölyeler, buluşmalar, konferanslar ve hackathonları keşfedin. Geçmiş ve gelecek tüm etkinliklerimize göz atın, türe göre filtreleyin.",
+  gallery_title: "Etkinlik galerisi",
+  gallery_description: "Geçmiş etkinliklerimizden kareler ve unutulmaz anlar.",
+  suggest_title: "Etkinlik düzenlemek ister misin?",
+  suggest_description:
+    "Atölye, buluşma veya sunum için bir fikrin mi var? Bilgini topluluğumuzla paylaşmana yardımcı olmaktan memnuniyet duyarız.",
+  crew_title: "Bizim Ekibimiz",
+  crew_description: "AYZEK'i ileriye taşıyan, arkasında emek olan isimlerle tanış.",
+  cta_title: "Fikrini projeye dönüştür",
+  cta_description: "AYZEK'te öğren, üret ve geleceği birlikte şekillendir.",
+  cta_button: "Katıl",
+  stats_0_value: "150+",
+  stats_0_label: "Topluluk Üyesi",
+  stats_1_value: "25+",
+  stats_1_label: "Düzenlenen Etkinlik",
+  stats_2_value: "10+",
+  stats_2_label: "Tamamlanan Proje",
+  stats_3_value: "3",
+  stats_3_label: "Yıl Aktif",
+};
+
+type EditField = { key: string; label: string; type: "text" | "textarea" };
+
+const SECTION_FIELDS: Record<string, EditField[]> = {
+  hero: [
+    { key: "hero_title", label: "Ana başlık (yeni satır = alt satıra geçer)", type: "textarea" },
+    { key: "hero_subtitle", label: "Alt açıklama", type: "textarea" },
+    { key: "hero_cta_primary", label: "Birincil buton yazısı", type: "text" },
+    { key: "hero_cta_secondary", label: "İkincil buton yazısı", type: "text" },
+  ],
+  about: [
+    { key: "about_title", label: "Başlık", type: "text" },
+    { key: "about_description", label: "Kısa açıklama", type: "textarea" },
+    { key: "about_extra", label: "Ek paragraf", type: "textarea" },
+  ],
+  awards: [
+    { key: "awards_title", label: "Başlık", type: "text" },
+    { key: "awards_description", label: "Açıklama", type: "textarea" },
+  ],
+  events: [
+    { key: "events_title", label: "Başlık", type: "text" },
+    { key: "events_description", label: "Açıklama", type: "textarea" },
+  ],
+  gallery: [
+    { key: "gallery_title", label: "Başlık", type: "text" },
+    { key: "gallery_description", label: "Açıklama", type: "textarea" },
+  ],
+  suggest: [
+    { key: "suggest_title", label: "Başlık", type: "text" },
+    { key: "suggest_description", label: "Açıklama", type: "textarea" },
+  ],
+  crew: [
+    { key: "crew_title", label: "Başlık", type: "text" },
+    { key: "crew_description", label: "Açıklama", type: "textarea" },
+  ],
+  cta: [
+    { key: "cta_title", label: "Başlık", type: "text" },
+    { key: "cta_description", label: "Açıklama", type: "textarea" },
+    { key: "cta_button", label: "Buton yazısı", type: "text" },
+  ],
+  stats: [
+    { key: "stats_0_value", label: "1. rakam", type: "text" },
+    { key: "stats_0_label", label: "1. etiket", type: "text" },
+    { key: "stats_1_value", label: "2. rakam", type: "text" },
+    { key: "stats_1_label", label: "2. etiket", type: "text" },
+    { key: "stats_2_value", label: "3. rakam", type: "text" },
+    { key: "stats_2_label", label: "3. etiket", type: "text" },
+    { key: "stats_3_value", label: "4. rakam", type: "text" },
+    { key: "stats_3_label", label: "4. etiket", type: "text" },
+  ],
+};
+
+const SECTION_TITLES: Record<string, string> = {
+  hero: "Hero Bölümünü Düzenle",
+  about: "Hakkımızda Bölümünü Düzenle",
+  awards: "Ödüllerimiz Bölümünü Düzenle",
+  events: "Etkinlikler Bölümünü Düzenle",
+  gallery: "Etkinlik Galerisi Bölümünü Düzenle",
+  suggest: "Etkinlik Öner Bölümünü Düzenle",
+  crew: "Ekibimiz Bölümünü Düzenle",
+  cta: "Kapanış Bölümünü Düzenle",
+  stats: "İstatistikleri Düzenle",
+};
+
+/** "Satır 1\nSatır 2" → KineticHeading'in beklediği kelime kelime dizi (yeni satır = breakBefore). */
+function toKineticWords(text: string): { text: string; breakBefore?: boolean }[] {
+  const words: { text: string; breakBefore?: boolean }[] = [];
+  text.split("\n").forEach((line, lineIndex) => {
+    line
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .forEach((w, wordIndex) => {
+        words.push({ text: w, breakBefore: lineIndex > 0 && wordIndex === 0 });
+      });
+  });
+  return words;
+}
 
 export default function HomePage() {
   const [editingSection, setEditingSection] = useState<string | null>(null);
@@ -49,27 +162,6 @@ export default function HomePage() {
 
   const [isEventSuggestOpen, setIsEventSuggestOpen] = useState(false);
   const [eventSuggestForm, setEventSuggestForm] = useState({ title: "", description: "", contact: "" });
-
-  // Hero'daki yörüngedeki üye fotoğrafları — ekip üyelerinden birkaçı, hata olursa sessizce boş kalır
-  const [heroMembers, setHeroMembers] = useState<{ id: number; name: string; photoUrl: string }[]>([]);
-  useEffect(() => {
-    const fetchHeroMembers = async () => {
-      try {
-        const response = await axios.get(`${API_BASE}/crew/`);
-        const grouped = response.data as Record<string, any[]>;
-        const flattened = Object.values(grouped).flat().slice(0, 4);
-        const formatted = flattened.map((member: any) => ({
-          id: member.id,
-          name: member.name,
-          photoUrl: normalizeImageUrl(member.photo_url),
-        }));
-        setHeroMembers(formatted);
-      } catch {
-        setHeroMembers([]);
-      }
-    };
-    fetchHeroMembers();
-  }, []);
 
   useEffect(() => {
     const fetchAllEvents = async () => {
@@ -115,17 +207,27 @@ export default function HomePage() {
     }
   };
 
-  // Statik veriler
-  const [stats, setStats] = useState([
-    { value: "150+", label: "Topluluk Üyesi", icon: Users },
-    { value: "25+", label: "Düzenlenen Etkinlik", icon: Calendar },
-    { value: "10+", label: "Tamamlanan Proje", icon: Rocket },
-    { value: "3", label: "Yıl Aktif", icon: Clock },
-  ]);
-  const [aboutPreview, setAboutPreview] = useState({
-    title: "Hakkımızda",
-    description: "AYZEK, teknoloji tutkunu bireylerden oluşan bir topluluktur. Birlikte öğrenir, gelişir ve geleceği şekillendiririz.",
-  });
+  // Anasayfa metinleri — backend'deki /site-content'ten çekilir, yoksa DEFAULT_CONTENT kullanılır
+  const [content, setContent] = useState<Record<string, string>>({});
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const { data } = await axios.get(`${API_BASE}/site-content`);
+        setContent(data);
+      } catch (err) {
+        console.error("Site içeriği çekilirken hata:", err);
+      }
+    };
+    fetchContent();
+  }, []);
+  const text = (key: string) => content[key] ?? DEFAULT_CONTENT[key] ?? "";
+
+  const statIcons = [Users, Calendar, Rocket, Clock];
+  const stats = statIcons.map((icon, i) => ({
+    value: text(`stats_${i}_value`),
+    label: text(`stats_${i}_label`),
+    icon,
+  }));
 
   // Hero arka plan glow'ları için hafif mouse parallax — birkaç piksel, abartısız
   const handleHeroParallax = (e: React.MouseEvent<HTMLElement>) => {
@@ -141,21 +243,17 @@ export default function HomePage() {
   };
 
   // Handler fonksiyonları
-  const handleEditStats = () => setEditingSection("stats");
-  const handleEditAbout = () => setEditingSection("about");
-  const handleSaveContent = (data: any) => {
-    if (editingSection === "stats") {
-      setStats((prev) =>
-        prev.map((s, i) => ({
-          ...s,
-          value: data[`stat${i}_value`] ?? s.value,
-          label: data[`stat${i}_label`] ?? s.label,
-        }))
-      );
-    } else if (editingSection === "about") {
-      setAboutPreview(data);
-    }
+  const handleEditSection = (section: string) => setEditingSection(section);
+  const handleSaveContent = async (data: Record<string, string>) => {
     setEditingSection(null);
+    try {
+      await api.put("/site-content", data);
+      setContent((prev) => ({ ...prev, ...data }));
+      toast.success("İçerik güncellendi");
+    } catch (err) {
+      console.error("Site içeriği kaydedilemedi:", err);
+      toast.error("Kaydedilemedi — admin girişi gerekli olabilir");
+    }
   };
 
   return (
@@ -187,42 +285,24 @@ export default function HomePage() {
         />
 
         <div className="container max-w-screen-xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-12 lg:gap-8 items-center">
-            {/* Sol: metin */}
-            <div className="relative flex flex-col items-center text-center lg:items-start lg:text-left">
+          <div className="grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] lg:grid-rows-[auto_auto] gap-10 lg:gap-8 items-center">
+            {/* Sol: başlık + alt metin */}
+            <InlineEditWrapper
+              onEdit={() => handleEditSection("hero")}
+              className="relative flex flex-col items-center text-center lg:items-start lg:text-left order-1 lg:col-start-1 lg:row-start-1"
+            >
               <KineticHeading
                 className="font-display font-bold tracking-tight text-4xl sm:text-6xl md:text-7xl leading-[1.05] max-w-2xl text-foreground dark:drop-shadow-[0_0_40px_rgba(34,211,238,0.25)]"
-                words={[
-                  { text: "Teknolojiyi" },
-                  { text: "birlikte" },
-                  { text: "öğreniyor," },
-                  { text: "üretiyoruz.", breakBefore: true },
-                ]}
+                words={toKineticWords(text("hero_title"))}
               />
 
-              <p className="text-muted-foreground max-w-xl text-base sm:text-lg leading-relaxed mt-5 sm:mt-6">
-                AYZEK; hackathonlardan açık kaynağa, atölyelerden networking etkinliklerine kadar
-                teknoloji tutkunlarını bir araya getiren, Selçuk Üniversitesi teknoloji topluluğu.
-                Birlikte öğreniyor, birlikte üretiyor, birlikte büyüyoruz.
+              <p className="text-muted-foreground max-w-xl text-lg sm:text-xl leading-relaxed mt-5 sm:mt-6">
+                {text("hero_subtitle")}
               </p>
-
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 mt-7 sm:mt-8">
-                <MagneticButton>
-                  <Button asChild size="lg" className="rounded-full bg-ayzek-gradient hover:opacity-90 btn-hover-scale btn-sweep text-primary-foreground px-7 shadow-[0_0_30px_-6px_rgba(37,99,235,0.55)]">
-                    <Link href="/join">
-                      Topluluğa katıl
-                      <ArrowRight className="w-4 h-4 ml-1.5" />
-                    </Link>
-                  </Button>
-                </MagneticButton>
-                <Button asChild size="lg" variant="outline" className="rounded-full border-foreground/20 text-foreground hover:bg-foreground/[0.06] px-6">
-                  <Link href="/#etkinlikler">Etkinlikleri gör</Link>
-                </Button>
-              </div>
-            </div>
+            </InlineEditWrapper>
 
             {/* Sağ: logo, ışıklı kaide ve yörüngede dönen üye fotoğrafları */}
-            <div className="relative w-full h-[300px] sm:h-[360px] lg:h-[440px]">
+            <div className="relative w-full h-[300px] sm:h-[360px] lg:h-[440px] order-2 lg:col-start-2 lg:row-start-1 lg:row-span-2">
               {/* eş merkezli halkalar */}
               <div className="absolute inset-[6%] rounded-full border border-primary/10" />
               <div className="absolute inset-[16%] rounded-full border border-primary/15" />
@@ -238,45 +318,36 @@ export default function HomePage() {
                   <Image src="/ayzek-logo.png" alt="AYZEK" fill priority className="object-contain dark:drop-shadow-[0_0_45px_rgba(34,211,238,0.55)]" />
                 </div>
               </div>
-
-              {/* yörüngedeki üye fotoğrafları */}
-              {heroMembers.map((m, i) => {
-                const pos = [
-                  "left-[4%] top-[8%]",
-                  "right-[2%] top-[14%]",
-                  "left-[0%] bottom-[8%]",
-                  "right-[6%] bottom-[2%]",
-                ][i];
-                return (
-                  <div
-                    key={m.id}
-                    className={`absolute ${pos} animate-float`}
-                    style={{ animationDelay: `${i * 0.45}s` }}
-                  >
-                    <div className="relative size-12 sm:size-14 rounded-full ring-2 ring-primary/40 bg-card overflow-hidden shadow-[0_0_20px_-6px_rgba(34,211,238,0.45)]">
-                      {m.photoUrl ? (
-                        <Image src={m.photoUrl} alt={m.name} fill className="object-cover" quality={60} />
-                      ) : (
-                        <div className="w-full h-full grid place-items-center">
-                          <Users className="w-5 h-5 text-primary/70" />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
             </div>
+
+            {/* Butonlar — mobilde logonun altında, masaüstünde metnin altında (sol sütun) */}
+            <InlineEditWrapper
+              onEdit={() => handleEditSection("hero")}
+              className="order-3 lg:col-start-1 lg:row-start-2 flex flex-wrap items-center justify-center lg:justify-start gap-3"
+            >
+              <MagneticButton className="flex-shrink-0">
+                <Button asChild size="lg" className="rounded-full bg-ayzek-gradient hover:opacity-90 btn-hover-scale btn-sweep text-primary-foreground px-7 shadow-[0_0_30px_-6px_rgba(37,99,235,0.55)] whitespace-nowrap">
+                  <Link href="/join">
+                    {text("hero_cta_primary")}
+                    <ArrowRight className="w-4 h-4 ml-1.5" />
+                  </Link>
+                </Button>
+              </MagneticButton>
+              <Button asChild size="lg" variant="outline" className="rounded-full border-foreground/20 text-foreground hover:bg-foreground/[0.06] px-6 flex-shrink-0 whitespace-nowrap">
+                <Link href="/#etkinlikler">{text("hero_cta_secondary")}</Link>
+              </Button>
+            </InlineEditWrapper>
           </div>
 
           {/* İstatistikler — ortalanmış, ayraçsız */}
-          <InlineEditWrapper onEdit={handleEditStats} className="mt-14 sm:mt-16">
-            <ScrollAnimation animation="fade-in" delay={150} className="relative flex flex-wrap items-start justify-center gap-x-10 gap-y-6 sm:gap-x-16">
+          <InlineEditWrapper onEdit={() => handleEditSection("stats")} className="mt-14 sm:mt-16">
+            <ScrollAnimation animation="fade-in" delay={150} className="relative grid grid-cols-2 sm:grid-cols-4 justify-items-center gap-y-6 gap-x-6 sm:gap-x-12 md:gap-x-16">
               {stats.map((s, i) => (
                 <div key={i} className="flex flex-col items-center">
-                  <div className="font-display font-bold text-3xl sm:text-4xl text-primary leading-none">
+                  <div className="font-display font-bold text-4xl sm:text-5xl text-primary leading-none">
                     <CountUp value={s.value} />
                   </div>
-                  <div className="text-[10px] sm:text-[11px] font-medium tracking-wide text-muted-foreground mt-2 uppercase">
+                  <div className="text-xs sm:text-sm font-medium tracking-wide text-muted-foreground mt-2 uppercase">
                     {s.label}
                   </div>
                 </div>
@@ -296,17 +367,15 @@ export default function HomePage() {
 
       {/* ============ HAKKIMIZDA ============ */}
       <section id="hakkimizda" className="scroll-mt-header">
-        <InlineEditWrapper onEdit={handleEditAbout} className="section-band py-10 sm:py-14 md:py-18 px-3 sm:px-4">
+        <InlineEditWrapper onEdit={() => handleEditSection("about")} className="section-band py-10 sm:py-14 md:py-18 px-3 sm:px-4">
           <div className="container max-w-screen-xl mx-auto">
             <ScrollAnimation animation="fade-up" className="max-w-3xl mb-8 sm:mb-10">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold text-foreground mb-4">{aboutPreview.title}</h2>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold text-foreground mb-4">{text("about_title")}</h2>
               <p className="text-muted-foreground text-base sm:text-lg leading-relaxed">
-                {aboutPreview.description || "AYZEK, Selçuk Üniversitesi'nde teknolojiye meraklı öğrencileri bir araya getiren bir topluluk."}
+                {text("about_description")}
               </p>
               <p className="text-muted-foreground text-base sm:text-lg leading-relaxed mt-4">
-                Hackathonlardan açık kaynağa, atölyelerden networking etkinliklerine kadar birlikte
-                öğreniyor, birlikte üretiyoruz. Herkesin fikrini özgürce paylaşabildiği, birbirinden
-                öğrenmenin normalleştiği bir ortam kuruyoruz — deneyim seviyesi fark etmeksizin.
+                {text("about_extra")}
               </p>
             </ScrollAnimation>
             <ScrollAnimation animation="fade-up" delay={150}>
@@ -318,12 +387,12 @@ export default function HomePage() {
 
       {/* ============ ÖDÜLLERİMİZ ============ */}
       <section id="odullerimiz" className="scroll-mt-header">
-        <InlineEditWrapper className="section-band py-10 sm:py-14 md:py-18 px-3 sm:px-4">
+        <InlineEditWrapper onEdit={() => handleEditSection("awards")} className="section-band py-10 sm:py-14 md:py-18 px-3 sm:px-4">
           <div className="container max-w-screen-xl mx-auto">
             <ScrollAnimation animation="fade-up" className="text-center mb-6 sm:mb-8">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold mb-2 text-foreground">Ödüllerimiz</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto text-xs sm:text-sm md:text-base px-2 leading-snug">
-                Topluluğumuzun ve üyelerimizin yarışmalarda, hackathonlarda ve etkinliklerde kazandığı ödüller ve elde ettiği başarılar.
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold mb-2 text-foreground">{text("awards_title")}</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base md:text-lg px-2 leading-snug">
+                {text("awards_description")}
               </p>
             </ScrollAnimation>
             <ScrollAnimation animation="fade-up" delay={150}>
@@ -335,13 +404,12 @@ export default function HomePage() {
 
       {/* ============ ETKİNLİKLER ============ */}
       <section id="etkinlikler" className="scroll-mt-header">
-        <InlineEditWrapper className="py-10 sm:py-14 md:py-18 px-3 sm:px-4">
+        <InlineEditWrapper onEdit={() => handleEditSection("events")} className="py-10 sm:py-14 md:py-18 px-3 sm:px-4">
           <div className="container max-w-screen-xl mx-auto">
             <ScrollAnimation animation="fade-up" className="text-center mb-6 sm:mb-8">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold mb-2 text-foreground">Topluluk etkinlikleri</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto text-xs sm:text-sm md:text-base px-2 leading-snug">
-                Teknoloji topluluğumuzu ilham vermeye, eğitmeye ve birbirine bağlamaya yönelik tasarlanmış atölyeler,
-                buluşmalar, konferanslar ve hackathonları keşfedin. Geçmiş ve gelecek tüm etkinliklerimize göz atın, türe göre filtreleyin.
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold mb-2 text-foreground">{text("events_title")}</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base md:text-lg px-2 leading-snug">
+                {text("events_description")}
               </p>
             </ScrollAnimation>
             <ScrollAnimation animation="fade-up" delay={200}>
@@ -358,12 +426,12 @@ export default function HomePage() {
           </div>
         </InlineEditWrapper>
 
-        <InlineEditWrapper className="section-band py-6 sm:py-8 md:py-12 px-3 sm:px-4">
+        <InlineEditWrapper onEdit={() => handleEditSection("gallery")} className="section-band py-6 sm:py-8 md:py-12 px-3 sm:px-4">
           <div className="container max-w-screen-xl mx-auto">
             <ScrollAnimation animation="fade-up" className="text-center mb-6 sm:mb-8">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold mb-2 text-foreground">Etkinlik galerisi</h2>
-              <p className="text-muted-foreground max-w-xl mx-auto text-xs sm:text-sm md:text-base mt-1.5 leading-snug">
-                Geçmiş etkinliklerimizden kareler ve unutulmaz anlar.
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold mb-2 text-foreground">{text("gallery_title")}</h2>
+              <p className="text-muted-foreground max-w-xl mx-auto text-sm sm:text-base md:text-lg mt-1.5 leading-snug">
+                {text("gallery_description")}
               </p>
             </ScrollAnimation>
             <ScrollAnimation animation="fade-up" delay={200}>
@@ -372,12 +440,12 @@ export default function HomePage() {
           </div>
         </InlineEditWrapper>
 
-        <InlineEditWrapper className="py-10 sm:py-12 md:py-16 px-3 sm:px-4">
+        <InlineEditWrapper onEdit={() => handleEditSection("suggest")} className="py-10 sm:py-12 md:py-16 px-3 sm:px-4">
           <div className="container max-w-screen-xl mx-auto text-center">
             <ScrollAnimation animation="fade-up">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-extrabold mb-2 sm:mb-3 md:mb-4 text-foreground">Etkinlik düzenlemek ister misin?</h2>
-              <p className="text-muted-foreground mb-6 sm:mb-7 md:mb-8 max-w-2xl mx-auto text-xs sm:text-sm md:text-base px-2">
-                Atölye, buluşma veya sunum için bir fikrin mi var? Bilgini topluluğumuzla paylaşmana yardımcı olmaktan memnuniyet duyarız.
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-extrabold mb-2 sm:mb-3 md:mb-4 text-foreground">{text("suggest_title")}</h2>
+              <p className="text-muted-foreground mb-6 sm:mb-7 md:mb-8 max-w-2xl mx-auto text-sm sm:text-base md:text-lg px-2">
+                {text("suggest_description")}
               </p>
             </ScrollAnimation>
             <ScrollAnimation animation="scale-up" delay={200}>
@@ -447,12 +515,12 @@ export default function HomePage() {
 
       {/* ============ BİZİM EKİBİMİZ ============ */}
       <section id="ekibimiz" className="scroll-mt-header">
-        <InlineEditWrapper className="section-band py-10 sm:py-14 md:py-18 px-3 sm:px-4">
+        <InlineEditWrapper onEdit={() => handleEditSection("crew")} className="section-band py-10 sm:py-14 md:py-18 px-3 sm:px-4">
           <div className="container max-w-screen-xl mx-auto">
             <ScrollAnimation animation="fade-up" className="text-center mb-8 sm:mb-10">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold mb-2 text-foreground">Bizim Ekibimiz</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto text-xs sm:text-sm md:text-base px-2 leading-snug">
-                AYZEK&apos;i ileriye taşıyan, arkasında emek olan isimlerle tanış.
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold mb-2 text-foreground">{text("crew_title")}</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base md:text-lg px-2 leading-snug">
+                {text("crew_description")}
               </p>
             </ScrollAnimation>
             <CrewSection />
@@ -460,47 +528,8 @@ export default function HomePage() {
         </InlineEditWrapper>
       </section>
 
-      {/* ============ YOLCULUĞUMUZ — kapanışa yakın, "buraya nasıl geldik" anı ============ */}
-      <section id="yolculuk" className="scroll-mt-header">
-        <InlineEditWrapper className="section-band pt-10 sm:pt-14 md:pt-18 px-3 sm:px-4">
-          <div className="container max-w-screen-xl mx-auto text-center pb-2">
-            <span className="font-route text-[11px] text-ayzek-gradient block mb-2">/yolculuk</span>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold text-foreground">Yolculuğumuz</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base mt-2 leading-snug">
-              Bugün buradayız çünkü birlikte adım adım büyüdük — kilometre taşlarımız ve bu yolda yer alan isimler.
-            </p>
-          </div>
-        </InlineEditWrapper>
-
-        <InlineEditWrapper>
-          <ParallaxSection className="py-6 sm:py-8 md:py-12 px-3 sm:px-4" speed={0.3}>
-            <div className="container max-w-screen-xl mx-auto">
-              <ScrollAnimation animation="fade-up" className="text-center mb-6 sm:mb-8">
-                <h3 className="text-xl sm:text-2xl md:text-3xl font-display font-bold mb-2 text-foreground">Zaman kapsülü</h3>
-                <p className="text-muted-foreground max-w-3xl mx-auto text-xs sm:text-sm md:text-base leading-snug px-2">
-                  Topluluğumuzun yolculuğunu interaktif kilometre taşları, başarılar ve bugün kim olduğumuzu şekillendiren unutulmaz anlar aracılığıyla keşfedin.
-                </p>
-              </ScrollAnimation>
-              <ScrollAnimation animation="fade-up" delay={200}>
-                <div className="py-2 sm:py-4 md:py-6">
-                  <HorizontalTimeline />
-                </div>
-              </ScrollAnimation>
-            </div>
-          </ParallaxSection>
-        </InlineEditWrapper>
-
-        <InlineEditWrapper className="section-band py-10 sm:py-14 md:py-18 px-3 sm:px-4">
-          <div className="container max-w-screen-xl mx-auto">
-            <ScrollAnimation animation="fade-up">
-              <CommunityJourney />
-            </ScrollAnimation>
-          </div>
-        </InlineEditWrapper>
-      </section>
-
       {/* === Kapanış CTA bandı — sade dark glass panel === */}
-      <section className="relative px-3 sm:px-4 py-10 sm:py-14 md:py-20">
+      <InlineEditWrapper onEdit={() => handleEditSection("cta")} className="relative block px-3 sm:px-4 py-10 sm:py-14 md:py-20">
         <div className="container max-w-screen-xl mx-auto">
           <ScrollAnimation animation="fade-in">
             {/* İnce cyan→mor gradyan kenarlık için dıştaki 1px dolgulu sarmalayıcı */}
@@ -521,10 +550,10 @@ export default function HomePage() {
                 <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                   <div className="text-center md:text-left">
                     <h2 className="font-display font-extrabold text-2xl sm:text-3xl md:text-4xl text-[#F8FAFC] leading-tight">
-                      Fikrini projeye dönüştür
+                      {text("cta_title")}
                     </h2>
                     <p className="text-[#94A3B8] max-w-md mx-auto md:mx-0 text-sm sm:text-base mt-2 leading-relaxed">
-                      AYZEK&apos;te öğren, üret ve geleceği birlikte şekillendir.
+                      {text("cta_description")}
                     </p>
                   </div>
                   <div className="flex justify-center md:justify-end flex-shrink-0">
@@ -535,7 +564,7 @@ export default function HomePage() {
                         className="rounded-full px-7 font-semibold bg-[#22D3EE] text-[#061018] hover:bg-[#22D3EE] hover:-translate-y-0.5 hover:shadow-[0_10px_30px_-8px_rgba(34,211,238,0.5)] transition-all duration-200"
                       >
                         <Link href="/join">
-                          Katıl
+                          {text("cta_button")}
                           <ArrowRight className="w-4 h-4 ml-1.5" />
                         </Link>
                       </Button>
@@ -546,35 +575,20 @@ export default function HomePage() {
             </div>
           </ScrollAnimation>
         </div>
-      </section>
+      </InlineEditWrapper>
 
       <SiteFooter />
 
-      <ContentEditModal
-        isOpen={editingSection === "about"}
-        onClose={() => setEditingSection(null)}
-        onSave={handleSaveContent}
-        title="Hakkımızda Önizlemesini Düzenle"
-        description="Hakkımızda bölümünün önizleme içeriğini güncelleyin"
-        initialData={aboutPreview}
-        fields={[
-          { key: "title", label: "Başlık", type: "text", required: true },
-          { key: "description", label: "Açıklama", type: "textarea", required: true },
-        ]}
-      />
-
-      <ContentEditModal
-        isOpen={editingSection === "stats"}
-        onClose={() => setEditingSection(null)}
-        onSave={handleSaveContent}
-        title="İstatistikleri Düzenle"
-        description="Anasayfadaki rakamları güncelleyin"
-        initialData={stats.reduce((acc, s, i) => ({ ...acc, [`stat${i}_value`]: s.value, [`stat${i}_label`]: s.label }), {})}
-        fields={stats.flatMap((_, i) => [
-          { key: `stat${i}_value`, label: `${i + 1}. rakam`, type: "text" as const, required: true },
-          { key: `stat${i}_label`, label: `${i + 1}. etiket`, type: "text" as const, required: true },
-        ])}
-      />
+      {editingSection && SECTION_FIELDS[editingSection] && (
+        <ContentEditModal
+          isOpen={true}
+          onClose={() => setEditingSection(null)}
+          onSave={handleSaveContent}
+          title={SECTION_TITLES[editingSection] ?? "Bölümü Düzenle"}
+          initialData={Object.fromEntries(SECTION_FIELDS[editingSection].map((f) => [f.key, text(f.key)]))}
+          fields={SECTION_FIELDS[editingSection].map((f) => ({ ...f, required: true }))}
+        />
+      )}
     </div>
   );
 }

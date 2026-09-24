@@ -241,7 +241,12 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
           <TabsContent value="events" className="space-y-6">
             {/* !!! DEĞİŞİKLİK BURADA: events={...} gitti, sadece onNotify kaldı !!! */}
-            <EventsTab onNotify={(msg) => toast.success(msg)} />
+            <EventsTab
+              onNotify={(msg) => {
+                const isError = /hata|başarısız/i.test(msg);
+                isError ? toast.error(msg) : toast.success(msg);
+              }}
+            />
           </TabsContent>
 
           <TabsContent value="content" className="space-y-6">

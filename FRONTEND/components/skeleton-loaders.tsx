@@ -42,22 +42,6 @@ export function GalleryCardSkeleton() {
   )
 }
 
-export function TimelineItemSkeleton() {
-  return (
-    <div className="flex-none w-[75vw] xs:w-[65vw] sm:w-[55vw] md:w-[384px]">
-      <Card className="bg-card/80 backdrop-blur-sm border-foreground/10 h-full overflow-hidden">
-        <Skeleton className="h-32 sm:h-40 md:h-48 w-full" />
-        <CardContent className="p-3 sm:p-4 md:p-5">
-          <Skeleton className="h-4 w-24 mb-2 rounded-full" />
-          <Skeleton className="h-6 w-full mb-3" />
-          <Skeleton className="h-4 w-full mb-2" />
-          <Skeleton className="h-4 w-3/4" />
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
-
 export function TestimonialSkeleton() {
   return (
     <Card className="bg-white/90 dark:bg-card/70 border-black/10 dark:border-foreground/10 backdrop-blur-sm flex-none w-[72vw] sm:w-[60vw] md:w-auto">

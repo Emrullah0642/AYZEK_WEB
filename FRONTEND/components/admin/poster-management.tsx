@@ -8,7 +8,6 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { ImageIcon, Trash2, Edit } from "lucide-react"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 
@@ -36,7 +35,7 @@ const normalizeImageUrl = (v: string) => {
   return `${API_BASE}/public/uploads${path}`
 }
 
-const INITIAL_POSTER = { title: "", subtitle: "", content: "", image_url: "" }
+const INITIAL_POSTER = { image_url: "" }
 
 export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void }) {
   const [posterItems, setPosterItems] = useState<PosterOut[]>([])
@@ -52,6 +51,7 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
 
   // Ortak Dosya State'i
   const [posterFile, setPosterFile] = useState<File | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleManageOpenChange = (open: boolean) => {
     if (!open) {
@@ -79,11 +79,13 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
   }
 
   const handleAdd = async () => {
-    if (!newPoster.title) return
+    if (isSubmitting) return
+    if (!posterFile && !newPoster.image_url) {
+      onNotify("Bir görsel seçin")
+      return
+    }
     const formData = new FormData()
-    formData.append("title", newPoster.title)
-    if (newPoster.subtitle) formData.append("subtitle", newPoster.subtitle)
-    if (newPoster.content) formData.append("content", newPoster.content)
+    formData.append("title", `Poster ${Date.now()}`)
 
     if (posterFile) {
       formData.append("file", posterFile)
@@ -94,6 +96,7 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
     formData.append("is_active", "true")
     formData.append("order_index", String(posterItems.length))
 
+    setIsSubmitting(true)
     try {
       // api.post (Cookie otomatik gider)
       const { data } = await api.post<PosterOut>("/posters", formData, {
@@ -101,18 +104,21 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
       })
       setPosterItems((prev) => [data, ...prev])
 
-      setNewPoster({ title: "", subtitle: "", content: "", image_url: "" })
+      setNewPoster(INITIAL_POSTER)
       setPosterFile(null)
       setIsAddOpen(false)
       onNotify("Poster eklendi")
     } catch (e) {
       console.error("Poster ekle hata:", e)
       onNotify("Poster eklenemedi")
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   const handleUpdate = async () => {
-    if (!editPoster) return
+    if (!editPoster || isSubmitting) return
+    setIsSubmitting(true)
     try {
       const formData = new FormData()
       formData.append("title", editPoster.title)
@@ -141,6 +147,8 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
     } catch (e) {
       console.error("Poster güncelle hata:", e)
       onNotify("Güncelleme başarısız")
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -201,18 +209,6 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
               </DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <Label>Başlık *</Label>
-                  <Input value={newPoster.title} onChange={(e) => setNewPoster((p) => ({ ...p, title: e.target.value }))} />
-                </div>
-                <div>
-                  <Label>Alt Başlık</Label>
-                  <Input value={newPoster.subtitle || ""} onChange={(e) => setNewPoster((p) => ({ ...p, subtitle: e.target.value }))} />
-                </div>
-                <div>
-                  <Label>İçerik</Label>
-                  <Textarea value={newPoster.content || ""} onChange={(e) => setNewPoster((p) => ({ ...p, content: e.target.value }))} rows={4} />
-                </div>
-                <div>
                   <Label>Görsel *</Label>
                   <div className="flex gap-2">
                     <Input placeholder="URL girin veya dosya seçin" value={newPoster.image_url || ""} onChange={(e) => setNewPoster((p) => ({ ...p, image_url: e.target.value }))} className="flex-1" />
@@ -231,8 +227,10 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
                   {posterFile && <p className="text-xs text-green-600 mt-1">Seçili: {posterFile.name}</p>}
                 </div>
                 <div className="flex gap-2 pt-4">
-                  <Button onClick={handleAdd} className="flex-1 bg-ayzek-gradient hover:opacity-90">Ekle</Button>
-                  <Button variant="outline" onClick={() => setIsAddOpen(false)} className="flex-1">İptal</Button>
+                  <Button onClick={handleAdd} disabled={isSubmitting} className="flex-1 bg-ayzek-gradient hover:opacity-90">
+                    {isSubmitting ? "Yükleniyor..." : "Ekle"}
+                  </Button>
+                  <Button variant="outline" onClick={() => setIsAddOpen(false)} disabled={isSubmitting} className="flex-1">İptal</Button>
                 </div>
               </div>
             </DialogContent>
@@ -242,18 +240,19 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {posterItems.map((item) => (
             <Card key={item.id} className="overflow-hidden">
-              <div className="aspect-video bg-muted flex items-center justify-center">
+              <div className="h-44 bg-muted flex items-center justify-center overflow-hidden">
                 {item.image_url ? (
-                  <img src={normalizeImageUrl(item.image_url)} alt={item.title} className="w-full h-full object-cover" />
+                  <img
+                    src={normalizeImageUrl(item.image_url)}
+                    alt={item.title}
+                    className="block w-full h-full object-cover"
+                  />
                 ) : (
                   <ImageIcon className="w-8 h-8 text-muted-foreground" />
                 )}
               </div>
               <CardContent className="p-4">
-                <h3 className="font-semibold line-clamp-1">{item.title}</h3>
-                <p className="text-xs text-muted-foreground line-clamp-1">{item.subtitle}</p>
-                <p className="text-sm mt-2 break-words whitespace-pre-wrap">{item.content}</p>
-                <div className="flex justify-end mt-3 gap-2">
+                <div className="flex justify-end gap-2">
                   <Button size="sm" variant="outline" onClick={() => openEditDialog(item)}>Düzenle</Button>
                   <Button size="sm" variant="destructive" onClick={() => handleDelete(item.id)}>
                     <Trash2 className="w-3 h-3 mr-1" /> Sil
@@ -272,9 +271,6 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
             </DialogHeader>
             {editPoster && (
               <div className="space-y-4">
-                <div><Label>Başlık</Label><Input value={editPoster.title} onChange={(e) => setEditPoster({ ...editPoster, title: e.target.value })} /></div>
-                <div><Label>Alt Başlık</Label><Input value={editPoster.subtitle ?? ""} onChange={(e) => setEditPoster({ ...editPoster, subtitle: e.target.value })} /></div>
-                <div><Label>İçerik</Label><Textarea value={editPoster.content ?? ""} onChange={(e) => setEditPoster({ ...editPoster, content: e.target.value })} /></div>
                 <div>
                   <Label>Görsel URL</Label>
                   <div className="flex gap-2">
@@ -294,8 +290,10 @@ export function PosterManagement({ onNotify }: { onNotify: (msg: string) => void
                   {posterFile && <p className="text-xs text-green-600 mt-1">Yeni dosya seçildi: {posterFile.name}</p>}
                 </div>
                 <div className="flex gap-2 pt-2">
-                  <Button className="flex-1 bg-ayzek-gradient hover:opacity-90" onClick={handleUpdate}>Kaydet</Button>
-                  <Button variant="outline" className="flex-1" onClick={() => setEditOpen(false)}>Kapat</Button>
+                  <Button className="flex-1 bg-ayzek-gradient hover:opacity-90" onClick={handleUpdate} disabled={isSubmitting}>
+                    {isSubmitting ? "Yükleniyor..." : "Kaydet"}
+                  </Button>
+                  <Button variant="outline" className="flex-1" onClick={() => setEditOpen(false)} disabled={isSubmitting}>Kapat</Button>
                 </div>
               </div>
             )}

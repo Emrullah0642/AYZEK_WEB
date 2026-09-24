@@ -119,22 +119,22 @@ export function EventsCalendar({ events, loading }: EventsCalendarProps) {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
         <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
-          <Button variant="outline" size="sm" onClick={prevMonth} className="h-8 w-8 sm:h-9 sm:w-9">
-            <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4" />
+          <Button variant="outline" size="sm" onClick={prevMonth} className="h-11 w-11 sm:h-9 sm:w-9">
+            <ChevronLeft className="w-4 h-4" />
           </Button>
           <h2 className="text-base sm:text-lg md:text-2xl font-display font-bold">
             {currentMonth.toLocaleDateString("tr-TR", { month: "long", year: "numeric" })}
           </h2>
-          <Button variant="outline" size="sm" onClick={nextMonth} className="h-8 w-8 sm:h-9 sm:w-9">
-            <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
+          <Button variant="outline" size="sm" onClick={nextMonth} className="h-11 w-11 sm:h-9 sm:w-9">
+            <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
 
         {/* Dinamik Kategori Şeridi */}
         <div className="flex items-center gap-1.5 sm:gap-2 w-full md:w-auto">
           {uniqueCategories.length > 10 && (
-            <Button variant="outline" size="icon" onClick={() => scrollCats("left")} aria-label="Kategorileri sola kaydır" className="h-8 w-8 sm:h-9 sm:w-9 flex-shrink-0">
-              <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4" />
+            <Button variant="outline" size="icon" onClick={() => scrollCats("left")} aria-label="Kategorileri sola kaydır" className="h-11 w-11 sm:h-9 sm:w-9 flex-shrink-0">
+              <ChevronLeft className="w-4 h-4" />
             </Button>
           )}
 
@@ -144,7 +144,7 @@ export function EventsCalendar({ events, loading }: EventsCalendarProps) {
                 key="all"
                 variant={selectedCategory === "all" ? "default" : "outline"}
                 size="sm"
-                className="text-[10px] sm:text-xs whitespace-nowrap h-7 sm:h-8 px-2 sm:px-3"
+                className="text-xs sm:text-sm whitespace-nowrap h-8 sm:h-9 px-3 sm:px-4"
                 onClick={() => setSelectedCategory("all")}
               >
                 Tümü
@@ -154,21 +154,21 @@ export function EventsCalendar({ events, loading }: EventsCalendarProps) {
                   key={c}
                   variant={selectedCategory === c ? "default" : "outline"}
                   size="sm"
-                  className="text-[10px] sm:text-xs whitespace-nowrap h-7 sm:h-8 px-2 sm:px-3"
+                  className="text-xs sm:text-sm whitespace-nowrap h-8 sm:h-9 px-3 sm:px-4"
                   onClick={() => setSelectedCategory(c)}
                 >
                   {c}
                 </Button>
               ))}
               {uniqueCategories.length === 0 && (
-                <span className="text-[10px] sm:text-xs text-muted-foreground">Bu ay için kategori bulunamadı</span>
+                <span className="text-xs sm:text-sm text-muted-foreground">Bu ay için kategori bulunamadı</span>
               )}
             </div>
           </div>
 
           {uniqueCategories.length > 10 && (
-            <Button variant="outline" size="icon" onClick={() => scrollCats("right")} aria-label="Kategorileri sağa kaydır" className="h-8 w-8 sm:h-9 sm:w-9 flex-shrink-0">
-              <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
+            <Button variant="outline" size="icon" onClick={() => scrollCats("right")} aria-label="Kategorileri sağa kaydır" className="h-11 w-11 sm:h-9 sm:w-9 flex-shrink-0">
+              <ChevronRight className="w-4 h-4" />
             </Button>
           )}
         </div>
@@ -194,17 +194,17 @@ export function EventsCalendar({ events, loading }: EventsCalendarProps) {
             <TiltCard maxTilt={5}>
               <Card className="group hover:shadow-[0_0_30px_-8px_rgba(37,99,235,0.5)] transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 bg-card/70 backdrop-blur-sm border border-foreground/10">
                 <CardHeader className="relative overflow-hidden p-0">
-                  <div className="relative h-32 sm:h-36 md:h-44 lg:h-48">
-                    {/* !!! DEĞİŞİKLİK: normalizeImageUrl kullanıldı !!! */}
-                    {/* !!! DEĞİŞİKLİK: next/image kullanıldı !!! */}
-                    <Image
-                      src={normalizeImageUrl(event.image) || "/placeholder.svg"}
-                      alt={event.title}
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      className="object-cover transition-transform duration-300 group-hover:scale-110"
-                      quality={60}
-                    />
+                  <div className="relative h-40 sm:h-44 md:h-52 lg:h-56 bg-gradient-to-br from-primary/15 via-card/60 to-accent/15 flex items-center justify-center overflow-hidden">
+                    {/* Kart önizlemesinde sabit AYZEK logosu — yüklenen fotoğrafın kırpılmadan tam hali "Detayları Görüntüle" ile açılan modalde gösteriliyor */}
+                    <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 transition-transform duration-300 group-hover:scale-110">
+                      <Image
+                        src="/ayzek-logo.png"
+                        alt="AYZEK"
+                        fill
+                        sizes="80px"
+                        className="object-contain opacity-90"
+                      />
+                    </div>
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
 
                     {/* Kategori rozeti: SAĞ ÜST */}
@@ -222,16 +222,16 @@ export function EventsCalendar({ events, loading }: EventsCalendarProps) {
                 </CardHeader>
 
                 <CardContent className="p-3 sm:p-4 md:p-5 lg:p-6">
-                  <CardTitle className="font-display text-sm sm:text-base md:text-lg mb-1.5 sm:mb-2 line-clamp-2">
+                  <CardTitle className="font-display text-base sm:text-lg md:text-xl mb-1.5 sm:mb-2 line-clamp-2">
                     {event.title}
                   </CardTitle>
-                  <CardDescription className="text-xs sm:text-sm md:text-base mb-3 sm:mb-4 line-clamp-2 break-words min-h-[3em]">
+                  <CardDescription className="text-sm sm:text-base md:text-lg mb-3 sm:mb-4 line-clamp-2 break-words min-h-[3em]">
                     {event.description}
                   </CardDescription>
 
                   <div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4 text-[10px] sm:text-xs md:text-sm text-muted-foreground">
                     <div className="flex items-center gap-1.5 sm:gap-2">
-                      <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                      <MapPin className="w-4 h-4 flex-shrink-0" />
                       <span className="line-clamp-1">{event.location}</span>
                     </div>
                   </div>
@@ -259,13 +259,13 @@ export function EventsCalendar({ events, loading }: EventsCalendarProps) {
                       <div className="space-y-6">
                         {/* !!! DEĞİŞİKLİK: normalizeImageUrl kullanıldı !!! */}
                         {/* !!! DEĞİŞİKLİK: next/image kullanıldı !!! */}
-                        <div className="relative w-full h-64">
+                        <div className="relative w-full h-64 bg-black rounded-lg overflow-hidden">
                           <Image
                             src={normalizeImageUrl(event.image) || "/placeholder.svg"}
                             alt={event.title}
                             fill
                             sizes="(max-width: 768px) 100vw, 672px"
-                            className="object-cover rounded-lg"
+                            className="object-contain"
                             quality={60}
                           />
                         </div>
@@ -312,14 +312,16 @@ export function EventsCalendar({ events, loading }: EventsCalendarProps) {
                           </div>
                         </div>
 
-                        <div className="flex gap-3">
-                          <Button asChild className="flex-1">
-                            <a href={event.registrationLink} target="_blank" rel="noopener noreferrer">
-                              <ExternalLink className="w-4 h-4 mr-2" />
-                              Etkinliğe Başvur
-                            </a>
-                          </Button>
-                        </div>
+                        {event.registrationLink && (
+                          <div className="flex gap-3">
+                            <Button asChild className="flex-1">
+                              <a href={event.registrationLink} target="_blank" rel="noopener noreferrer">
+                                <ExternalLink className="w-4 h-4 mr-2" />
+                                Etkinliğe Başvur
+                              </a>
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </DialogContent>
                   </Dialog>

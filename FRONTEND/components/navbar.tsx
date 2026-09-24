@@ -17,7 +17,6 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
-import { ThemeToggle } from "@/components/theme-toggle"
 
 // Tek sayfa: tüm bölümler anasayfada, navbar oraya kaydırıyor. Sadece "Topluluğa Katıl" ayrı bir sayfa (/join).
 const links = [
@@ -140,8 +139,6 @@ export function AdminNavbar() {
 
           {/* Sağ: Aksiyonlar */}
           <div className="flex items-center gap-1.5 md:gap-2">
-            <ThemeToggle className="w-9 h-9 rounded-lg text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-white/[0.06]" />
-
             <div className="hidden md:block h-5 w-px bg-white/15 mx-0.5" />
 
             <MagneticNavCta />

@@ -34,7 +34,8 @@ def get_award(award_id: int, db: Session = Depends(get_db)):
 def create_award(
     title: str = Form(..., max_length=200),
     description: str = Form(...),
-    year: Optional[int] = Form(None),
+    location: Optional[str] = Form(None),
+    date: Optional[str] = Form(None),  # YYYY-MM-DD
     order_index: Optional[int] = Form(None),
     image_url: Optional[str] = Form(None),  # Manuel link girilirse
     file: Optional[UploadFile] = File(None),  # Dosya seçilirse
@@ -57,7 +58,8 @@ def create_award(
         title=title,
         description=description,
         image_url=final_image_url,
-        year=year,
+        location=location,
+        date=date,
         order_index=order_index,
     )
     return crud_awards.create(db, obj_in=award_in)
@@ -69,7 +71,8 @@ def update_award(
     award_id: int,
     title: Optional[str] = Form(None),
     description: Optional[str] = Form(None),
-    year: Optional[int] = Form(None),
+    location: Optional[str] = Form(None),
+    date: Optional[str] = Form(None),
     order_index: Optional[int] = Form(None),
     image_url: Optional[str] = Form(None),
     file: Optional[UploadFile] = File(None),
@@ -95,7 +98,8 @@ def update_award(
         title=title,
         description=description,
         image_url=final_image_url,
-        year=year,
+        location=location,
+        date=date,
         order_index=order_index,
     )
     return crud_awards.update(db, db_obj=db_obj, obj_in=update_data)

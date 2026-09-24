@@ -15,7 +15,7 @@ from sqlalchemy import (
 #from sqlalchemy.sql import
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from app.database import Base
-from datetime import datetime
+from datetime import datetime, date as date_type
 import enum
 
 
@@ -56,17 +56,6 @@ class CommunityApplication(Base):
 # -------------------------
 # Var olan modeller
 # -------------------------
-class TimelineEvents(Base):
-    __tablename__ = "timeline_events"
-
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, nullable=False)
-    description = Column(Text, nullable=False)
-    category = Column(String, nullable=False)
-    date_label = Column(String, nullable=False)  # "Mart 2024" gibi
-    image_url = Column(String, nullable=False)
-
-
 class Event(Base):
     __tablename__ = "events"
 
@@ -74,7 +63,7 @@ class Event(Base):
     slug = Column(String(200), unique=True, index=True, nullable=False)  # URL için
     title = Column(String(200), nullable=False)                          # Başlık
     description = Column(Text, nullable=False)                           # Açıklama
-    cover_image_url = Column(Text, nullable=False)                       # Fotoğraf
+    cover_image_url = Column(Text, nullable=True)                        # Fotoğraf
     start_at = Column(DateTime, nullable=False)                          # Tarih+Saat
     location = Column(String(200), nullable=False)                       # Konum
     category = Column(String(50), nullable=False)                        # Workshop/Meetup vb.
@@ -131,9 +120,21 @@ class Award(Base):
     title: Mapped[str] = mapped_column(String(200), nullable=False)          # Ödül adı
     description: Mapped[str] = mapped_column(Text, nullable=False)           # Açıklama
     image_url: Mapped[str | None] = mapped_column(String(500))               # Görsel/rozet URL
-    year: Mapped[int | None] = mapped_column(Integer, index=True)            # Kazanılan yıl
+    location: Mapped[str | None] = mapped_column(String(150))                # Konum
+    date: Mapped[date_type | None] = mapped_column(Date, index=True)         # Kazanıldığı tarih
     order_index: Mapped[int] = mapped_column(Integer, default=0, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class SiteContent(Base):
+    """Ana sayfadaki serbest metinler (başlık/açıklama) için basit key-value depo."""
+    __tablename__ = "site_content"
+
+    key: Mapped[str] = mapped_column(String(100), primary_key=True)
+    value: Mapped[str] = mapped_column(Text, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
 
 
 class Poster(Base):
@@ -171,23 +172,6 @@ class Admin(Base):
     email = Column(String(255), unique=True, index=True, nullable=False)
     password = Column(String(255), nullable=False)
     totp_secret = Column(String, nullable=True)
-
-
-class JourneyPerson(Base):
-    __tablename__ = 'journey_people'
-
-    id = Column(Integer, primary_key=True, index=True)
-    
-    year = Column(Integer, nullable=False, index=True)
-    name = Column(String(100), nullable=False)
-    role = Column(String(100), nullable=False)
-    description = Column(String(255), nullable=False)
-    photo_url = Column(String(255), nullable=True) # Opsiyonel görsel
-
-    created_at = Column(DateTime, default=datetime.utcnow)
-
-    def __repr__(self):
-        return f"<JourneyPerson(name='{self.name}', year={self.year})>"
 
 
 class CrewMember(Base):

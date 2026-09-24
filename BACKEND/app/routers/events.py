@@ -74,8 +74,9 @@ def create_event(
     location: str = Form(...),
     max_attendees: int = Form(...),
     category: str = Form(...),  # Kategori zorunlu hale getirildi
-    tags: Optional[str] = Form(None), 
+    tags: Optional[str] = Form(None),
     image_url: Optional[str] = Form(None),
+    registration_link: Optional[str] = Form(None),
     file: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
     current_admin: Admin = Depends(get_current_admin)
@@ -118,7 +119,7 @@ def create_event(
             tags=final_tags,
             cover_image_url=final_image_url,
             slug=unique_slug,
-            whatsapp_link="" # Formda yoksa boş string
+            whatsapp_link=registration_link or ""
         )
 
         return crud_events.create_event(db, payload)
@@ -142,6 +143,7 @@ def update_event(
     category: Optional[str] = Form(None),
     tags: Optional[str] = Form(None),
     image_url: Optional[str] = Form(None),
+    registration_link: Optional[str] = Form(None),
     file: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
     current_admin: Admin = Depends(get_current_admin)
@@ -179,6 +181,7 @@ def update_event(
     if category is not None: update_data["category"] = category
     if tags is not None: update_data["tags"] = tags
     if final_image_url is not None: update_data["cover_image_url"] = final_image_url
+    if registration_link is not None: update_data["whatsapp_link"] = registration_link
 
     # Slug güncellemek istenirse:
     if title is not None:
