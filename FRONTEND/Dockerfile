@@ -10,7 +10,7 @@ RUN npm install
 COPY . .
 
 # API adresi build sırasında Next.js bundle'ına gömülür
-ARG NEXT_PUBLIC_API_BASE=https://api.ayzek.tr
+ARG NEXT_PUBLIC_API_BASE=https://api.ayzek22.com.tr
 ENV NEXT_PUBLIC_API_BASE=$NEXT_PUBLIC_API_BASE
 
 # Next.js build alalım

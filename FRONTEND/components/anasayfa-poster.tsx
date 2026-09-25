@@ -15,7 +15,7 @@ type Poster = {
 };
 
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "https://api.ayzek.tr";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "https://api.ayzek22.com.tr";
 
 
 // --- GÜNCELLENMİŞ RESİM URL FONKSİYONU ---

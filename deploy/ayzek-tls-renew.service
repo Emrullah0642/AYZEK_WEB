@@ -1,0 +1,8 @@
+[Unit]
+Description=Renew AYZEK HTTPS certificate
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/ayzek/deploy/tls.sh renew

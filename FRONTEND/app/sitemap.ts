@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = 'https://ayzek.tr' // Domain değişince güncellenmeli
+    const baseUrl = 'https://ayzek22.com.tr'
 
     // Statik sayfalarımız — /about, /events, /teams artık anasayfadaki bölümler (redirect ile yönleniyor), ayrı sayfa değil
     const routes = [

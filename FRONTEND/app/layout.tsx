@@ -27,7 +27,7 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://ayzek.tr'), // Domain bağlanınca burası güncellenmeli
+  metadataBase: new URL('https://ayzek22.com.tr'),
   title: {
     default: "AYZEK - Topluluk Hafızası & Etkinlik Vitrini",
     template: "%s | AYZEK"
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "tr_TR",
-    url: "https://ayzek.tr",
+    url: "https://ayzek22.com.tr",
     title: "AYZEK - Topluluk Hafızası & Etkinlik Vitrini",
     description: "Topluluk başarılarını sergileyen, etkinlikleri ölümsüzleştiren ve üyeleri bir araya getiren modern topluluk platformu.",
     siteName: "AYZEK",

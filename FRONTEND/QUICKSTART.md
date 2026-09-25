@@ -37,8 +37,8 @@ yarn install
 
 ```bash
 # .env.local
-NEXT_PUBLIC_API_URL=https://api.ayzek.tr/api
-NEXT_PUBLIC_API_BASE_URL=https://api.ayzek.tr
+NEXT_PUBLIC_API_URL=https://api.ayzek22.com.tr/api
+NEXT_PUBLIC_API_BASE_URL=https://api.ayzek22.com.tr
 NEXT_PUBLIC_ADMIN_PASSWORD=admin123
 ```
 
@@ -48,7 +48,7 @@ NEXT_PUBLIC_ADMIN_PASSWORD=admin123
 npm run dev
 ```
 
-🎉 **Hazır!** [http://ayzek.tr](http://ayzek.tr) adresini tarayıcınızda açın.
+🎉 **Hazır!** [http://ayzek22.com.tr](http://ayzek22.com.tr) adresini tarayıcınızda açın.
 
 ---
 
@@ -242,7 +242,7 @@ Projeyi çalıştırmadan önce:
 - [ ] Backend API çalışıyor (varsa)
 - [ ] Port 3000 boş
 - [ ] `npm run dev` çalıştırıldı
-- [ ] http://ayzek.tr açıldı
+- [ ] http://ayzek22.com.tr açıldı
 
 ---
 
@@ -258,7 +258,7 @@ Projeyi çalıştırmadan önce:
 
 Sorularınız için:
 
-- 🌐 Website: [ayzek.tr](https://ayzek.tr)
+- 🌐 Website: [ayzek22.com.tr](https://ayzek22.com.tr)
 - 📧 Email: info@ayzek.com
 - 💬 Discord: [AYZEK Community]
 

@@ -18,7 +18,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'api.ayzek.tr',
+        hostname: 'api.ayzek22.com.tr',
         pathname: '/**',
       },
       {
@@ -28,7 +28,7 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'cdn.ayzek.tr',
+        hostname: 'cdn.ayzek22.com.tr',
         pathname: '/**',
       },
       {

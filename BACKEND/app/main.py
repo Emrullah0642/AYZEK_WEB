@@ -45,9 +45,8 @@ env_origins = os.getenv("ALLOWED_ORIGINS", "")
 ALLOWED_ORIGINS = [o.strip() for o in env_origins.split(",") if o.strip()] or [ 
     "http://localhost",
     "http://localhost:3000",
-    "https://ayzek.tr",       # <-- Bunu ekle
-    "http://ayzek.tr",
-    "https://api.ayzek.tr",  # <-- Bunu da ekle
+    "https://ayzek22.com.tr",
+    "https://www.ayzek22.com.tr",
 ]
 
 app.add_middleware(
@@ -86,4 +85,3 @@ app.include_router(site_content_router)
 @app.get("/")
 def root():
     return {"Fatih Emrullah": True}
-

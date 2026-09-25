@@ -1,7 +1,7 @@
 import axios from "axios"
 
 export const API_BASE =
-  (process.env.NEXT_PUBLIC_API_BASE || "https://api.ayzek.tr").replace(/\/+$/, "")
+  (process.env.NEXT_PUBLIC_API_BASE || "https://api.ayzek22.com.tr").replace(/\/+$/, "")
 
 export const api = axios.create({
   baseURL: API_BASE,

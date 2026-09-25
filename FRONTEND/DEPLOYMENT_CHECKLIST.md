@@ -26,14 +26,14 @@ import { NextSeo } from "next-seo";
 <NextSeo
   title="AYZEK - Teknoloji Topluluğu"
   description="Selçuk Üniversitesi teknoloji topluluğu"
-  canonical="https://ayzek.tr"
+  canonical="https://ayzek22.com.tr"
   openGraph={{
-    url: "https://ayzek.tr",
+    url: "https://ayzek22.com.tr",
     title: "AYZEK - Teknoloji Topluluğu",
     description: "Selçuk Üniversitesi teknoloji topluluğu",
     images: [
       {
-        url: "https://ayzek.tr/og-image.jpg",
+        url: "https://ayzek22.com.tr/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "AYZEK Logo",
@@ -206,37 +206,37 @@ import { MetadataRoute } from "next";
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
-      url: "https://ayzek.tr",
+      url: "https://ayzek22.com.tr",
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 1,
     },
     {
-      url: "https://ayzek.tr/about",
+      url: "https://ayzek22.com.tr/about",
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
-      url: "https://ayzek.tr/events",
+      url: "https://ayzek22.com.tr/events",
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
-      url: "https://ayzek.tr/teams",
+      url: "https://ayzek22.com.tr/teams",
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
-      url: "https://ayzek.tr/blog",
+      url: "https://ayzek22.com.tr/blog",
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,
     },
     {
-      url: "https://ayzek.tr/join",
+      url: "https://ayzek22.com.tr/join",
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.6,
@@ -257,7 +257,7 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: "/admin/",
     },
-    sitemap: "https://ayzek.tr/sitemap.xml",
+    sitemap: "https://ayzek22.com.tr/sitemap.xml",
   };
 }
 ```
