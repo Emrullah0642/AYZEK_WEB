@@ -45,7 +45,7 @@ def upgrade():
     for row in _rows():
         exists = connection.execute(
             sa.select(gallery_events.c.id)
-            .where(sa.func.lower(gallery_events.c.title) == row["title"].lower())
+            .where(gallery_events.c.title == row["title"])
             .limit(1)
         ).scalar()
         if exists is not None:
