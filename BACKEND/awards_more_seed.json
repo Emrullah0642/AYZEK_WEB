@@ -1,0 +1,29 @@
+[
+  {
+    "title": "ÜNİFEST 2026 Birincilik Ödülü",
+    "description": "ÜNİFEST'te Nitelikli İnsan ve Güçlü Aile kategorisinde birincilik ödülü.",
+    "image_url": "/public/awards/unifest-2026.jpg",
+    "location": "Burdur",
+    "date": "2026-05-07",
+    "order_index": 3,
+    "source_url": "https://drive.google.com/file/d/1oWClKSqzWf_2NsMgTHmFo5RP2scZMuwo/view"
+  },
+  {
+    "title": "Aksaray Ar-Ge Proje Pazarı Birincilik Ödülü",
+    "description": "Aksaray Üniversitesi 2. Ar-Ge Proje Pazarı'nda kazanılan birincilik ödülü.",
+    "image_url": "/public/awards/aksaray-arge-2025.jpg",
+    "location": "Aksaray",
+    "date": "2025-11-13",
+    "order_index": 4,
+    "source_url": "https://drive.google.com/file/d/17OElxf9dq7KGd4JE6HN2fv53zwJeQx_F/view"
+  },
+  {
+    "title": "Girişim Express 2025 Üçüncülük Ödülü",
+    "description": "Girişim Express Demo Day'de kazanılan üçüncülük ödülü.",
+    "image_url": "/public/awards/girisim-express-2025.jpg",
+    "location": "Konya",
+    "date": "2025-10-15",
+    "order_index": 5,
+    "source_url": "https://drive.google.com/file/d/1Tdihx4lN7ua8K4XggLUr9Vp8m3oHeF25/view"
+  }
+]

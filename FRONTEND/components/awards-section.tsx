@@ -16,7 +16,7 @@ type Award = {
   order_index: number | null
 }
 
-// İlk HTML'de üç ödül görünür; API kayıtları yüklenince yönetim panelindeki sıra kullanılır.
+// İlk HTML'de arşivdeki ödüller görünür; API kayıtları yüklenince yönetim panelindeki sıra kullanılır.
 const FALLBACK_AWARDS: Award[] = [
   {
     id: -1,
@@ -44,6 +44,33 @@ const FALLBACK_AWARDS: Award[] = [
     location: "Adana",
     date: null,
     order_index: 2,
+  },
+  {
+    id: -4,
+    title: "ÜNİFEST 2026 Birincilik Ödülü",
+    description: "ÜNİFEST'te Nitelikli İnsan ve Güçlü Aile kategorisinde birincilik ödülü.",
+    image_url: "/public/awards/unifest-2026.jpg",
+    location: "Burdur",
+    date: "2026-05-07",
+    order_index: 3,
+  },
+  {
+    id: -5,
+    title: "Aksaray Ar-Ge Proje Pazarı Birincilik Ödülü",
+    description: "Aksaray Üniversitesi 2. Ar-Ge Proje Pazarı'nda kazanılan birincilik ödülü.",
+    image_url: "/public/awards/aksaray-arge-2025.jpg",
+    location: "Aksaray",
+    date: "2025-11-13",
+    order_index: 4,
+  },
+  {
+    id: -6,
+    title: "Girişim Express 2025 Üçüncülük Ödülü",
+    description: "Girişim Express Demo Day'de kazanılan üçüncülük ödülü.",
+    image_url: "/public/awards/girisim-express-2025.jpg",
+    location: "Konya",
+    date: "2025-10-15",
+    order_index: 5,
   },
 ]
 
