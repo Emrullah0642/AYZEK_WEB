@@ -47,7 +47,13 @@ const parseDate = (value: string) => {
 }
 
 export function EventsCalendar({ events, loading }: EventsCalendarProps) {
-  const [currentMonth, setCurrentMonth] = useState(new Date())
+  const [currentMonth, setCurrentMonth] = useState(() => {
+    const firstEvent = events
+      .map((event) => parseDate(event.date))
+      .filter((date): date is Date => date !== null)
+      .sort((a, b) => a.getTime() - b.getTime())[0]
+    return firstEvent ? new Date(firstEvent.getFullYear(), firstEvent.getMonth(), 1) : new Date()
+  })
   const [selectedCategory, setSelectedCategory] = useState<string>("all")
 
   const uniqueCategories = useMemo(() => {

@@ -7,6 +7,7 @@ import Image from "next/image";
 import { AutoSlidingBanner } from "@/components/anasayfa-poster";
 import { ScrollAnimation } from "@/components/scroll-animations";
 import EventGallery from "@/components/event-gallery";
+import { CommunityEventHighlights } from "@/components/community-event-highlights";
 import { EventsCalendar, type Event } from "@/components/events-calendar";
 import { CrewSection } from "@/components/crew-section";
 import { AwardsSection } from "@/components/awards-section";
@@ -53,7 +54,7 @@ const DEFAULT_CONTENT: Record<string, string> = {
     "Topluluğumuzun ve üyelerimizin yarışmalarda, hackathonlarda ve etkinliklerde kazandığı ödüller ve elde ettiği başarılar.",
   events_title: "Topluluk etkinlikleri",
   events_description:
-    "Teknoloji topluluğumuzu ilham vermeye, eğitmeye ve birbirine bağlamaya yönelik tasarlanmış atölyeler, buluşmalar, konferanslar ve hackathonları keşfedin. Geçmiş ve gelecek tüm etkinliklerimize göz atın, türe göre filtreleyin.",
+    "Atölyelerden yarışmalara, topluluğumuzun son buluşmalarını ve yaklaşan etkinliklerini keşfedin.",
   gallery_title: "Etkinlik galerisi",
   gallery_description: "Geçmiş etkinliklerimizden kareler ve unutulmaz anlar.",
   suggest_title: "Etkinlik düzenlemek ister misin?",
@@ -155,10 +156,8 @@ function toKineticWords(text: string): { text: string; breakBefore?: boolean }[]
 export default function HomePage() {
   const [editingSection, setEditingSection] = useState<string | null>(null);
 
-  // Etkinlikler (events sayfasından taşındı) — tüm etkinlikler, takvim + galeri burada
+  // Yönetim panelinde duyurulan yaklaşan etkinlikler; geçmiş etkinlikler galeri arşivinden gösterilir.
   const [events, setEvents] = useState<Event[]>([]);
-  const [eventsLoading, setEventsLoading] = useState(true);
-  const [eventsError, setEventsError] = useState<any>(null);
 
   const [isEventSuggestOpen, setIsEventSuggestOpen] = useState(false);
   const [eventSuggestForm, setEventSuggestForm] = useState({ title: "", description: "", contact: "" });
@@ -166,7 +165,6 @@ export default function HomePage() {
   useEffect(() => {
     const fetchAllEvents = async () => {
       try {
-        setEventsLoading(true);
         const response = await axios.get(`${API_BASE}/events`);
         response.data.sort((a: any, b: any) => b.id - a.id);
         const formatted: Event[] = response.data.map((event: any) => ({
@@ -185,14 +183,13 @@ export default function HomePage() {
         }));
         setEvents(formatted);
       } catch (err: any) {
-        setEventsError(err);
         console.error("Etkinlikler çekilirken bir hata oluştu:", err);
-      } finally {
-        setEventsLoading(false);
       }
     };
     fetchAllEvents();
   }, []);
+
+  const upcomingEvents = events.filter((event) => new Date(event.date).getTime() >= Date.now());
 
   const handleEventSuggestSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -411,32 +408,32 @@ export default function HomePage() {
               </p>
             </ScrollAnimation>
             <ScrollAnimation animation="fade-up" delay={200}>
-              {eventsLoading ? (
-                <p className="text-center text-muted-foreground">Etkinlikler yükleniyor...</p>
-              ) : eventsError ? (
-                <p className="text-center text-destructive">Etkinlikler çekilirken bir hata oluştu.</p>
-              ) : events.length > 0 ? (
-                <EventsCalendar events={events} loading={eventsLoading} />
-              ) : (
-                <p className="text-center text-muted-foreground">Henüz etkinlik bulunmuyor.</p>
-              )}
+              <CommunityEventHighlights />
             </ScrollAnimation>
+            {upcomingEvents.length > 0 && (
+              <div className="mt-12">
+                <h3 className="mb-5 font-display text-xl font-semibold text-foreground sm:text-2xl">Yaklaşan etkinlikler</h3>
+                <EventsCalendar events={upcomingEvents} loading={false} />
+              </div>
+            )}
           </div>
         </InlineEditWrapper>
 
-        <InlineEditWrapper onEdit={() => handleEditSection("gallery")} className="section-band py-6 sm:py-8 md:py-12 px-3 sm:px-4">
-          <div className="container max-w-screen-xl mx-auto">
-            <ScrollAnimation animation="fade-up" className="text-center mb-6 sm:mb-8">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold mb-2 text-foreground">{text("gallery_title")}</h2>
-              <p className="text-muted-foreground max-w-xl mx-auto text-sm sm:text-base md:text-lg mt-1.5 leading-snug">
-                {text("gallery_description")}
-              </p>
-            </ScrollAnimation>
-            <ScrollAnimation animation="fade-up" delay={200}>
-              <EventGallery />
-            </ScrollAnimation>
-          </div>
-        </InlineEditWrapper>
+        <div id="etkinlik-galerisi" className="scroll-mt-header">
+          <InlineEditWrapper onEdit={() => handleEditSection("gallery")} className="section-band py-6 sm:py-8 md:py-12 px-3 sm:px-4">
+            <div className="container max-w-screen-xl mx-auto">
+              <ScrollAnimation animation="fade-up" className="text-center mb-6 sm:mb-8">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold mb-2 text-foreground">{text("gallery_title")}</h2>
+                <p className="text-muted-foreground max-w-xl mx-auto text-sm sm:text-base md:text-lg mt-1.5 leading-snug">
+                  {text("gallery_description")}
+                </p>
+              </ScrollAnimation>
+              <ScrollAnimation animation="fade-up" delay={200}>
+                <EventGallery />
+              </ScrollAnimation>
+            </div>
+          </InlineEditWrapper>
+        </div>
 
         <InlineEditWrapper onEdit={() => handleEditSection("suggest")} className="py-10 sm:py-12 md:py-16 px-3 sm:px-4">
           <div className="container max-w-screen-xl mx-auto text-center">

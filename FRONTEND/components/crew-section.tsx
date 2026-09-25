@@ -32,15 +32,14 @@ type CrewMember = {
 type GroupedCrewMembers = Record<string, CrewMember[]>
 
 const TEAM_PHOTOS = [
-  { src: "/yeniekip1.JPG", alt: "AYZEK ekibinin toplu fotoğrafı", label: "Ekibimiz" },
-  { src: "/eskiekip3.JPG", alt: "AYZEK ekibi TEKNOFEST'te", label: "TEKNOFEST" },
-  { src: "/oryantasyon.jpg", alt: "AYZEK ekibi proje standında", label: "Birlikte üretiyoruz" },
+  { src: "/ekip-2026-acceltra.jpg", alt: "AYZEK ACCELTRA ekibi TEKNOFEST 2026 standında", label: "AYZEK ACCELTRA · 2026" },
+  { src: "/ekip-2026-iha.jpg", alt: "AYZEK Savaşan İHA ekibi çalışırken", label: "Savaşan İHA Takımı · 2026" },
+  { src: "/ekip-2026-lojistik.jpg", alt: "AYZEK Lojistik Optimizasyonu takımından üyeler", label: "Lojistik Takımı · 2026" },
 ]
 
 /** "Bizim Ekibimiz" — /crew endpoint'inden kategoriye göre gruplanmış gerçek ekip üyeleri. */
 export function CrewSection() {
   const [groupedMembers, setGroupedMembers] = useState<GroupedCrewMembers>({})
-  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const fetchCrewMembers = async () => {
@@ -51,16 +50,11 @@ export function CrewSection() {
         setGroupedMembers(data)
       } catch (err: any) {
         console.error("Ekip üyeleri çekilirken hata:", err)
-      } finally {
-        setIsLoading(false)
       }
     }
     fetchCrewMembers()
   }, [])
 
-  if (isLoading) {
-    return <p className="text-center text-sm text-muted-foreground py-16">Ekibimiz yükleniyor...</p>
-  }
   const categoryKeys = [
     ...PREFERRED_CATEGORY_ORDER.filter((key) => (groupedMembers[key]?.length || 0) > 0),
     ...Object.keys(groupedMembers).filter(
@@ -71,7 +65,7 @@ export function CrewSection() {
   if (categoryKeys.length === 0) {
     return (
       <div className="space-y-5">
-        <p className="text-center text-sm text-muted-foreground">Ekibimizden kareler</p>
+        <p className="text-center text-sm text-muted-foreground">2026 ekiplerimizden kareler</p>
         <div className="grid gap-4 md:grid-cols-3">
           {TEAM_PHOTOS.map((photo, index) => (
             <ScrollAnimation key={photo.src} animation="fade-up" delay={index * 80}>
