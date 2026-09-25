@@ -1,7 +1,6 @@
 
 import type React from "react"
 import type { Metadata } from "next"
-import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google"
 import { GeistSans } from "geist/font/sans"
 import "./globals.css"
 import { AdminProvider } from "@/contexts/admin-context"
@@ -11,20 +10,6 @@ import { SplashScreen } from "@/components/splash-screen"
 import { NotificationsProvider } from "@/contexts/notifications"
 import { Toaster } from "@/components/ui/sonner"
 import { GoogleTagManager } from '@next/third-parties/google'
-
-const displayFont = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["600", "700", "800"],
-  variable: "--font-space-grotesk",
-  display: "swap",
-})
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-jetbrains-mono",
-  display: "swap",
-})
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://ayzek.tr'), // Domain bağlanınca burası güncellenmeli
@@ -78,7 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="tr"
-      className={`${GeistSans.variable} ${displayFont.variable} ${jetbrainsMono.variable}`}
+      className={GeistSans.variable}
       suppressHydrationWarning
     >
       <head />

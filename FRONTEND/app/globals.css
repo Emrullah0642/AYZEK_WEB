@@ -120,10 +120,10 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* Geist Sans (gövde metni) + Space Grotesk (başlıklar) — next/font ile self-hosted */
+  /* Yerel Geist Sans, sunucu derlemesinde harici font indirmeyi gerektirmez. */
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
-  --font-mono-ui: var(--font-jetbrains-mono), ui-monospace, "SF Mono", monospace;
+  --font-display: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono-ui: ui-monospace, "SF Mono", monospace;
 }
 
 @layer base {
