@@ -16,7 +16,7 @@ jobs:
       - name: Sunucuya deploy et
         uses: appleboy/ssh-action@v1
         with:
-          host: ${{ secrets.HOST }}
+          host: 213.128.79.6
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           command_timeout: 30m
