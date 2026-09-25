@@ -46,6 +46,7 @@ ALLOWED_ORIGINS = [o.strip() for o in env_origins.split(",") if o.strip()] or [
     "http://localhost",
     "http://localhost:3000",
     "https://ayzek.tr",       # <-- Bunu ekle
+    "https://www.ayzek.tr",
     "http://ayzek.tr",
     "https://api.ayzek.tr",  # <-- Bunu da ekle
 ]
@@ -86,4 +87,3 @@ app.include_router(site_content_router)
 @app.get("/")
 def root():
     return {"Fatih Emrullah": True}
-

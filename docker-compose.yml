@@ -18,7 +18,7 @@ services:
     environment:
       # Gizli değerler (JWT_SECRET_KEY, R2_*) .env dosyasından gelir
       DATABASE_URL: postgresql+psycopg2://postgres:${POSTGRES_PASSWORD}@db:5432/ayzek_db
-      ALLOWED_ORIGINS: "https://ayzek.tr, https://api.ayzek.tr"
+      ALLOWED_ORIGINS: "https://ayzek.tr, https://www.ayzek.tr, https://api.ayzek.tr"
     env_file:
       - .env
     volumes:
