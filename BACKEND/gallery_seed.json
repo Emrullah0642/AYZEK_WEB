@@ -1,0 +1,250 @@
+[
+  {
+    "title": "ÜNİFEST Ödül Töreni",
+    "description": "Gençlik ve Spor Bakanlığı ÜNİFEST kapsamında düzenlenen ödül törenine katıldık; projelerimizle ödül aldık.",
+    "category": "Yarışma",
+    "date": "2026-05-07",
+    "location": "Burdur Mehmet Akif Ersoy Üniversitesi",
+    "image_url": "/public/gallery/seed-00.jpg"
+  },
+  {
+    "title": "Web Hackathon",
+    "description": "Kapsül'de düzenlenen web hackathonunda ekiplerimiz gün boyu kod yazıp projelerini sundu.",
+    "category": "Hackathon",
+    "date": "2025-05-10",
+    "location": "Kapsül Teknoloji Platformu, Konya",
+    "image_url": "/public/gallery/seed-01.jpg"
+  },
+  {
+    "title": "Redis Eğitimi",
+    "description": "Redis'in temellerini ve gerçek dünya kullanım senaryolarını uygulamalı olarak ele aldığımız eğitim.",
+    "category": "Workshop",
+    "date": "2026-05-11",
+    "location": "Selçuk Üniversitesi",
+    "image_url": "/public/gallery/seed-02.jpg"
+  },
+  {
+    "title": "Prof. Dr. Hasan Mandal Söyleşisi",
+    "description": "Bilim, teknoloji ve yenilik ekosistemi üzerine Prof. Dr. Hasan Mandal'ın konuk olduğu söyleşi.",
+    "category": "Söyleşi",
+    "date": "2025-10-11",
+    "location": "Selçuk Üniversitesi",
+    "image_url": "/public/gallery/seed-03.jpg"
+  },
+  {
+    "title": "Aksaray Ar-Ge Proje Pazarı",
+    "description": "2. Ar-Ge Proje Pazarı'nda projelerimizi sergiledik ve birincilik ödülü kazandık.",
+    "category": "Yarışma",
+    "date": "2025-11-13",
+    "location": "Aksaray Üniversitesi",
+    "image_url": "/public/gallery/seed-04.jpg"
+  },
+  {
+    "title": "Aksaray Zirvesi",
+    "description": "Aksaray Üniversitesi'nde düzenlenen zirveye topluluk olarak katılım sağladık.",
+    "category": "Zirve",
+    "date": "2025-04-14",
+    "location": "Aksaray Üniversitesi",
+    "image_url": "/public/gallery/seed-05.jpg"
+  },
+  {
+    "title": "Otizm Farkındalık Etkinliği",
+    "description": "Otizm farkındalığı için düzenlenen, çocukların gösterileriyle renklenen sosyal sorumluluk etkinliği.",
+    "category": "Sosyal Sorumluluk",
+    "date": "2025-04-15",
+    "location": "Selçuk Üniversitesi",
+    "image_url": "/public/gallery/seed-06.jpg"
+  },
+  {
+    "title": "TeknoSEL Festivali",
+    "description": "TeknoSEL'de Selçuk Üniversitesi standında ekiplerimizin projelerini ziyaretçilere tanıttık.",
+    "category": "Festival",
+    "date": "2026-05-15",
+    "location": "Konya",
+    "image_url": "/public/gallery/seed-07.jpg"
+  },
+  {
+    "title": "Boost The Idea",
+    "description": "Konya Teknokent iş birliğiyle düzenlenen, öğrenci projelerinin jüriye sunulduğu Boost The Idea programı.",
+    "category": "Sunum",
+    "date": "2025-05-16",
+    "location": "Konya Teknokent",
+    "image_url": "/public/gallery/seed-08.jpg"
+  },
+  {
+    "title": "Yapay Zeka ve Veri Bilimi Eğitimi",
+    "description": "Yapay zekanın ne olduğu, veri hazırlama süreci ve kullanım alanları üzerine eğitim.",
+    "category": "Workshop",
+    "date": "2026-04-19",
+    "location": "Selçuk Üniversitesi",
+    "image_url": "/public/gallery/seed-09.jpg"
+  },
+  {
+    "title": "AYZEK Connect",
+    "description": "Yüzlerce öğrencinin katıldığı, dil ve kariyer odaklı AYZEK Connect buluşması.",
+    "category": "Networking",
+    "date": "2025-11-20",
+    "location": "Selçuk Üniversitesi",
+    "image_url": "/public/gallery/seed-10.jpg"
+  },
+  {
+    "title": "Tanışma Şenliği 2025",
+    "description": "Yeni dönemin tanışma şenliğinde standımızda öğrencilerle buluştuk.",
+    "category": "Tanıtım",
+    "date": "2025-10-22",
+    "location": "Selçuk Üniversitesi",
+    "image_url": "/public/gallery/seed-11.jpg"
+  },
+  {
+    "title": "TEKNOFEST 2026",
+    "description": "TEKNOFEST 2026'da Savaşan İHA ve Lojistik Optimizasyon yarışmalarında takımlarımızla yer aldık.",
+    "category": "Yarışma",
+    "date": "2026-09-03",
+    "location": "TEKNOFEST 2026",
+    "image_url": "/public/gallery/seed-12.jpg"
+  },
+  {
+    "title": "ROS Eğitimi",
+    "description": "Robot Operating System (ROS) temellerini ele aldığımız uygulamalı eğitim.",
+    "category": "Workshop",
+    "date": "2025-12-21",
+    "location": "Konya",
+    "image_url": "/public/gallery/seed-13.jpg"
+  },
+  {
+    "title": "Selçuk Ödülleri",
+    "description": "Selçuk Ödülleri töreninde topluluğumuz ve üyelerimiz ödüllendirildi.",
+    "category": "Ödül",
+    "date": "2026-05-21",
+    "location": "Selçuk Üniversitesi",
+    "image_url": "/public/gallery/seed-14.jpg"
+  },
+  {
+    "title": "Külliye Topluluklar İftarı",
+    "description": "Öğrenci topluluklarıyla bir araya gelinen iftar programına katıldık.",
+    "category": "Networking",
+    "date": "2026-02-26",
+    "location": "Cumhurbaşkanlığı Külliyesi, Ankara",
+    "image_url": "/public/gallery/seed-15.jpg"
+  },
+  {
+    "title": "SUTIS 2025",
+    "description": "Uluslararası Teknoloji ve İnovasyon Öğrenci Sempozyumu (SUTIS) 2025.",
+    "category": "Sempozyum",
+    "date": "2025-11-27",
+    "location": "Selçuk Üniversitesi",
+    "image_url": "/public/gallery/seed-16.jpg"
+  },
+  {
+    "title": "Sistem Tasarımı ve Redis Eğitimi",
+    "description": "Ölçeklenebilir sistem tasarımı ve Redis üzerine uygulamalı eğitim.",
+    "category": "Workshop",
+    "date": "2026-04-27",
+    "location": "Selçuk Üniversitesi",
+    "image_url": "/public/gallery/seed-17.jpg"
+  },
+  {
+    "title": "TÜBİTAK 2209 Bilgilendirme Sunumu",
+    "description": "TÜBİTAK 2209 proje başvuru süreci üzerine bilgilendirme sunumu.",
+    "category": "Sunum",
+    "date": "2025-10-30",
+    "location": "Selçuk Üniversitesi",
+    "image_url": "/public/gallery/seed-18.jpg"
+  },
+  {
+    "title": "Algoritma Atölyeleri",
+    "description": "ÜNİDES destekli, uygulamalı algoritma ve robotik atölyeleri.",
+    "category": "Workshop",
+    "date": "2026-03-07",
+    "location": "Selçuk Üniversitesi",
+    "image_url": "/public/gallery/seed-20.jpg"
+  },
+  {
+    "title": "Beyond Technologies Ziyareti",
+    "description": "Ankara'da Beyond Technologies'e teknik gezi düzenledik.",
+    "category": "Gezi",
+    "date": "2025-10-18",
+    "location": "Ankara",
+    "image_url": "/public/gallery/seed-21.jpg"
+  },
+  {
+    "title": "Yapay Zeka 101",
+    "description": "Yapay zekaya giriş eğitimimiz; dolu bir salonla temel kavramları ele aldık.",
+    "category": "Workshop",
+    "date": "2024-10-18",
+    "location": "Selçuk Üniversitesi",
+    "image_url": "/public/gallery/seed-22.jpg"
+  },
+  {
+    "title": "DevFest",
+    "description": "Google Developer Groups'un DevFest etkinliğine topluluk olarak katıldık.",
+    "category": "Konferans",
+    "date": "2025-11-19",
+    "location": "Konya",
+    "image_url": "/public/gallery/seed-25.jpg"
+  },
+  {
+    "title": "Girişim Express Demo Day",
+    "description": "Girişim Express 2025 Demo Day'de projelerimizi sunduk ve ödül aldık.",
+    "category": "Yarışma",
+    "date": "2025-10-15",
+    "location": "Konya Teknokent",
+    "image_url": "/public/gallery/seed-26.jpg"
+  },
+  {
+    "title": "Huawei Alan Tanıtımı: Yapay Zeka",
+    "description": "Huawei'den Oğuz Kağan Ülkü ile yapay zeka alanı tanıtım etkinliği.",
+    "category": "Söyleşi",
+    "date": "2025-11-23",
+    "location": "Selçuk Üniversitesi",
+    "image_url": "/public/gallery/seed-27.jpg"
+  },
+  {
+    "title": "StepUp: Yapay Zeka Uzmanları Tecrübe Paylaşımı",
+    "description": "Yapay zeka alanındaki uzmanların tecrübelerini paylaştığı StepUp etkinliği.",
+    "category": "Söyleşi",
+    "date": "2024-11-24",
+    "location": "Kapsül Teknoloji Platformu, Konya",
+    "image_url": "/public/gallery/seed-30.jpg"
+  },
+  {
+    "title": "SUTIS 2024",
+    "description": "Uluslararası Teknoloji ve İnovasyon Öğrenci Sempozyumu (SUTIS) 2024.",
+    "category": "Sempozyum",
+    "date": "2024-12-26",
+    "location": "Selçuk Üniversitesi",
+    "image_url": "/public/gallery/seed-31.jpg"
+  },
+  {
+    "title": "Tanışma Etkinliği 2025-2026",
+    "description": "Yeni dönemde topluluğa katılan üyelerle tanışma buluşması.",
+    "category": "Networking",
+    "date": "2025-10-04",
+    "location": "Konya",
+    "image_url": "/public/gallery/seed-32.jpg"
+  },
+  {
+    "title": "Tanışma Şenliği 2024",
+    "description": "Tanışma şenliğinde standımızda projelerimizi ve topluluğumuzu tanıttık.",
+    "category": "Tanıtım",
+    "date": "2024-10-15",
+    "location": "Selçuk Üniversitesi",
+    "image_url": "/public/gallery/seed-33.jpg"
+  },
+  {
+    "title": "TEKNOFEST 2024",
+    "description": "TEKNOFEST 2024'te Teknofest Şampiyonlar Ligi ve üniversite standında yer aldık.",
+    "category": "Yarışma",
+    "date": "2024-10-06",
+    "location": "Adana",
+    "image_url": "/public/gallery/seed-34.jpg"
+  },
+  {
+    "title": "TEKNOFEST 2025",
+    "description": "TEKNOFEST 2025'te Engelsiz Yaşam Teknolojileri ve Finansal Teknolojiler yarışmalarında derece aldık.",
+    "category": "Yarışma",
+    "date": "2025-09-17",
+    "location": "İstanbul",
+    "image_url": "/public/gallery/seed-35.jpg"
+  }
+]

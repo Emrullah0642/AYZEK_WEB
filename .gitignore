@@ -22,3 +22,6 @@ build/
 # Klasör dursun ama içindeki resimler gitmesin
 BACKEND/public/uploads/*
 !BACKEND/public/uploads/.gitkeep
+
+# Local Google Drive selection and its upload helper stay on the workstation.
+secilen-gorseller/
