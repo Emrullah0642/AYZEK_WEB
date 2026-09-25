@@ -3,7 +3,7 @@
 #   bash server-setup.sh
 set -euo pipefail
 
-REPO_URL="https://github.com/Emrullah0642/AYZEK_WEB.git"
+REPO_URL="https://github.com/sadikbilal/AYZEK_WEB.git"
 APP_DIR="/opt/ayzek"
 
 echo ">> Paketler güncelleniyor"
@@ -62,7 +62,6 @@ Kurulum tamam. Kalan adımlar:
      cd $APP_DIR && docker compose up -d --build
 
 4) GitHub > AYZEK_WEB > Settings > Secrets and variables > Actions:
-     HOST     = bu sunucunun IP'si
      SSH_USER = root
      SSH_KEY  = aşağıdaki özel anahtarın TAMAMI:
        cat /root/.ssh/github_deploy
