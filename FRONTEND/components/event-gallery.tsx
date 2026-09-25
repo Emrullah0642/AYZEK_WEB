@@ -46,6 +46,16 @@ function fmtTRDate(d: string) {
   })
 }
 
+// Kartlar yer değiştirirken 3D geçişi koru; fotoğrafların tamamı kartın içinde görünür.
+function cardStyle(offset: number): React.CSSProperties {
+  const distance = Math.abs(offset)
+  return {
+    transform: `translateX(${-50 + offset * 62}%) translateZ(${-distance * 110}px) rotateY(${-Math.sign(offset) * Math.min(distance * 28, 48)}deg) scale(${Math.max(1 - distance * 0.12, 0.7)})`,
+    opacity: Math.max(1 - distance * 0.28, 0.18),
+    zIndex: 10 - distance,
+  }
+}
+
 export default function EventGallery() {
   const [items, setItems] = useState<GalleryEvent[]>([])
   const [loading, setLoading] = useState(true)
@@ -129,7 +139,8 @@ export default function EventGallery() {
   return (
     <div className="mx-auto max-w-5xl space-y-4">
       <div
-        className="relative h-[360px] w-full overflow-hidden rounded-2xl border border-foreground/10 bg-[#0D1726] shadow-2xl sm:h-[480px] lg:h-[600px] touch-pan-y select-none"
+        className="relative h-[300px] w-full overflow-hidden rounded-2xl bg-[#080f1d] sm:h-[440px] lg:h-[560px] touch-pan-y select-none"
+        style={{ perspective: "1400px" }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
@@ -139,17 +150,31 @@ export default function EventGallery() {
         role="group"
         aria-label={`${activeItem.title} fotoğrafı; ok tuşlarıyla diğer etkinliklere geçin`}
       >
-        <Image
-          key={activeItem.id}
-          src={imageUrl}
-          alt={activeItem.title}
-          fill
-          sizes="(max-width: 1024px) 100vw, 1024px"
-          className="object-contain"
-          priority
-          quality={85}
-          draggable={false}
-        />
+        {items.map((photo, index) => {
+          const offset = index - activeIndex
+          if (Math.abs(offset) > 2) return null
+          const isActive = offset === 0
+          return (
+            <div
+              key={photo.id}
+              className={`absolute left-1/2 top-0 h-full w-[92vw] sm:w-[82vw] lg:w-[min(76vw,800px)] cursor-pointer overflow-hidden rounded-2xl border border-[#22D3EE]/20 bg-[#0D1726] shadow-2xl transition-[transform,opacity] duration-500 ease-out motion-reduce:transition-none ${isActive ? "ring-1 ring-[#22D3EE]/40" : "hover:border-[#22D3EE]/50"}`}
+              style={cardStyle(offset)}
+              onClick={() => !isActive && goTo(index)}
+              aria-hidden={!isActive}
+            >
+              <Image
+                src={normalizeImageUrl(photo.image_url) || "/placeholder.svg"}
+                alt={photo.title}
+                fill
+                sizes="(max-width: 640px) 92vw, (max-width: 1024px) 82vw, 800px"
+                className="object-contain"
+                priority={Math.abs(offset) <= 1}
+                quality={85}
+                draggable={false}
+              />
+            </div>
+          )
+        })}
       </div>
 
       <div className="flex items-center justify-between gap-3">

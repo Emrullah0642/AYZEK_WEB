@@ -16,6 +16,18 @@ type Award = {
   order_index: number | null
 }
 
+const FALLBACK_AWARDS: Award[] = [
+  {
+    id: -1,
+    title: "TEKNOFEST'ten bir kare",
+    description: "Proje standımız ve ödüllerimizden bir fotoğraf.",
+    image_url: "/oduller.JPG",
+    location: null,
+    date: null,
+    order_index: 0,
+  },
+]
+
 function fmtTRDate(d: string) {
   const dt = new Date(`${d}T00:00:00`)
   if (Number.isNaN(dt.getTime())) return d
@@ -26,7 +38,6 @@ function fmtTRDate(d: string) {
 export function AwardsSection() {
   const [awards, setAwards] = useState<Award[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [activeIndex, setActiveIndex] = useState(0)
 
   useEffect(() => {
@@ -35,9 +46,9 @@ export function AwardsSection() {
         const response = await fetch(`${API_BASE}/awards`)
         if (!response.ok) throw new Error("Ödüller verisi alınamadı.")
         const data: Award[] = await response.json()
-        setAwards(data)
+        setAwards(data.length ? data : FALLBACK_AWARDS)
       } catch (err: any) {
-        setError(err.message)
+        setAwards(FALLBACK_AWARDS)
         console.error("Ödüller çekilirken hata:", err)
       } finally {
         setIsLoading(false)
@@ -53,19 +64,9 @@ export function AwardsSection() {
   if (isLoading) {
     return <p className="text-center text-sm text-muted-foreground py-16">Ödüller yükleniyor...</p>
   }
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center gap-1.5 py-16 text-center px-4">
-        <p className="text-muted-foreground text-sm">Ödül bilgisi şu anda yüklenemedi.</p>
-        <p className="text-muted-foreground/60 text-xs">Birazdan tekrar dene.</p>
-      </div>
-    )
-  }
-  if (awards.length === 0) {
-    return <p className="text-center text-sm text-muted-foreground py-16">Henüz ödül eklenmemiş.</p>
-  }
-
   const active = awards[activeIndex]
+
+  if (!active) return null
 
   return (
     <div className="space-y-4">
@@ -76,11 +77,11 @@ export function AwardsSection() {
               {active.image_url ? (
                 <Image
                   key={active.id}
-                  src={normalizeImageUrl(active.image_url) || "/placeholder.svg"}
+                  src={active.id === -1 ? "/oduller.JPG" : normalizeImageUrl(active.image_url) || "/placeholder.svg"}
                   alt={active.title}
                   fill
                   sizes="(max-width: 640px) 40vw, 320px"
-                  className="object-cover award-photo-kenburns"
+                  className="object-contain award-photo-kenburns"
                   quality={80}
                   priority
                 />

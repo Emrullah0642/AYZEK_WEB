@@ -31,11 +31,16 @@ type CrewMember = {
 
 type GroupedCrewMembers = Record<string, CrewMember[]>
 
+const TEAM_PHOTOS = [
+  { src: "/yeniekip1.JPG", alt: "AYZEK ekibinin toplu fotoğrafı", label: "Ekibimiz" },
+  { src: "/eskiekip3.JPG", alt: "AYZEK ekibi TEKNOFEST'te", label: "TEKNOFEST" },
+  { src: "/oryantasyon.jpg", alt: "AYZEK ekibi proje standında", label: "Birlikte üretiyoruz" },
+]
+
 /** "Bizim Ekibimiz" — /crew endpoint'inden kategoriye göre gruplanmış gerçek ekip üyeleri. */
 export function CrewSection() {
   const [groupedMembers, setGroupedMembers] = useState<GroupedCrewMembers>({})
   const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchCrewMembers = async () => {
@@ -45,7 +50,6 @@ export function CrewSection() {
         const data: GroupedCrewMembers = await response.json()
         setGroupedMembers(data)
       } catch (err: any) {
-        setError(err.message)
         console.error("Ekip üyeleri çekilirken hata:", err)
       } finally {
         setIsLoading(false)
@@ -57,15 +61,6 @@ export function CrewSection() {
   if (isLoading) {
     return <p className="text-center text-sm text-muted-foreground py-16">Ekibimiz yükleniyor...</p>
   }
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center gap-1.5 py-16 text-center px-4">
-        <p className="text-muted-foreground text-sm">Ekip bilgisi şu anda yüklenemedi.</p>
-        <p className="text-muted-foreground/60 text-xs">Birazdan tekrar dene.</p>
-      </div>
-    )
-  }
-
   const categoryKeys = [
     ...PREFERRED_CATEGORY_ORDER.filter((key) => (groupedMembers[key]?.length || 0) > 0),
     ...Object.keys(groupedMembers).filter(
@@ -74,7 +69,23 @@ export function CrewSection() {
   ]
 
   if (categoryKeys.length === 0) {
-    return <p className="text-center text-sm text-muted-foreground py-16">Henüz ekip üyesi eklenmemiş.</p>
+    return (
+      <div className="space-y-5">
+        <p className="text-center text-sm text-muted-foreground">Ekibimizden kareler</p>
+        <div className="grid gap-4 md:grid-cols-3">
+          {TEAM_PHOTOS.map((photo, index) => (
+            <ScrollAnimation key={photo.src} animation="fade-up" delay={index * 80}>
+              <div className="group overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0D1726] transition-colors hover:border-[#22D3EE]/30">
+                <div className="relative h-64 sm:h-72 md:h-60 lg:h-72">
+                  <Image src={photo.src} alt={photo.alt} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-contain transition-transform duration-500 group-hover:scale-[1.03]" />
+                </div>
+                <p className="px-4 py-3 text-center font-medium text-foreground">{photo.label}</p>
+              </div>
+            </ScrollAnimation>
+          ))}
+        </div>
+      </div>
+    )
   }
 
   return (

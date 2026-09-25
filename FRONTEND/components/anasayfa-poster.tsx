@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Sparkles } from "lucide-react";
 import Image from "next/image";
 
 type Poster = {
@@ -16,6 +15,13 @@ type Poster = {
 
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "https://api.ayzek.tr";
+
+// Yeni sunucudaki afiş kayıtları boşken repodaki gerçek fotoğrafları göster.
+const FALLBACK_SLIDES: Poster[] = [
+  { id: -1, title: "AYZEK ekibi", image_url: "/yeniekip1.JPG", is_active: true, order_index: 0 },
+  { id: -2, title: "AYZEK TEKNOFEST'te", image_url: "/eskiekip3.JPG", is_active: true, order_index: 1 },
+  { id: -3, title: "AYZEK proje standı", image_url: "/oryantasyon.jpg", is_active: true, order_index: 2 },
+];
 
 
 // --- GÜNCELLENMİŞ RESİM URL FONKSİYONU ---
@@ -75,31 +81,9 @@ export function AutoSlidingBanner() {
   }, []);
 
   const activeSlides = useMemo(
-    () => slides.filter((s) => s.is_active !== false),
+    () => (slides.length ? slides : FALLBACK_SLIDES).filter((s) => s.is_active !== false),
     [slides]
   );
-
-  if (!activeSlides.length) {
-    return (
-      <div className="relative h-[200px] sm:h-[240px] md:h-[300px] lg:h-[340px] xl:h-[380px] rounded-2xl overflow-hidden border border-foreground/10 bg-gradient-to-br from-primary/10 via-card/60 to-accent/10">
-        <div
-          className="absolute inset-0 opacity-40"
-          style={{
-            backgroundImage: "radial-gradient(oklch(1 0 0 / 8%) 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
-          }}
-        />
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center px-6">
-          <div className="grid place-items-center size-12 sm:size-14 rounded-full bg-gradient-to-br from-primary/25 to-accent/15 ring-1 ring-foreground/15">
-            <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-          </div>
-          <p className="text-muted-foreground text-xs sm:text-sm max-w-xs">
-            Yakında burada öne çıkan duyurular ve etkinlik afişleri olacak.
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   // Kesintisiz döngü için görsel dizisini bir kez tekrarlıyoruz.
   const loopSlides = activeSlides.length > 1 ? [...activeSlides, ...activeSlides] : activeSlides;
@@ -126,7 +110,7 @@ export function AutoSlidingBanner() {
                 src={imgSrc}
                 alt={slide.title || "Poster"}
                 fill
-                className="object-cover"
+                className="object-contain"
                 priority={index === 0 || index === 1}
                 quality={90}
                 sizes="(max-width: 640px) 90vw, (max-width: 768px) 75vw, (max-width: 1024px) 62vw, 42vw"
