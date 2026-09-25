@@ -1,0 +1,29 @@
+[
+  {
+    "title": "Selçuk Ödülleri 2026 — Temsil Ödülü",
+    "description": "Selçuk Üniversitesi ödül töreninde verilen Temsil Ödülü.",
+    "image_url": "/public/awards/selcuk-temsil-2026.jpg",
+    "location": "Konya",
+    "date": "2026-05-21",
+    "order_index": 0,
+    "source_url": "https://drive.google.com/file/d/1FwaSlEuk9ucSdgQUvzDpVDnzlagdYxh0/view"
+  },
+  {
+    "title": "TEKNOFEST İstanbul 2025 Ödül Töreni",
+    "description": "TEKNOFEST İstanbul 2025 ödül töreninden bir kare.",
+    "image_url": "/public/awards/teknofest-istanbul-2025.jpg",
+    "location": "İstanbul",
+    "date": "2025-09-21",
+    "order_index": 1,
+    "source_url": "https://drive.google.com/file/d/1PUGOVmsiLbOlmqRTUMIvoURfUQEOwJ0m/view"
+  },
+  {
+    "title": "TEKNOFEST Adana 2024 Madalyaları",
+    "description": "TEKNOFEST Adana'da kazanılan madalya ve kupalarımız.",
+    "image_url": "/public/awards/teknofest-adana-2024.jpg",
+    "location": "Adana",
+    "date": null,
+    "order_index": 2,
+    "source_url": "https://drive.google.com/file/d/1kpL3_xMaQ07LRrtIyROVBfbCmNucWjgc/view"
+  }
+]

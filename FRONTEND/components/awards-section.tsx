@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Trophy, Calendar, MapPin, ChevronLeft, ChevronRight } from "lucide-react"
+import { useEffect, useState } from "react"
+import { Trophy, Calendar, MapPin, Maximize2 } from "lucide-react"
 import Image from "next/image"
 import { API_BASE } from "@/lib/api"
 import { normalizeImageUrl } from "@/lib/normalize-image-url"
@@ -16,15 +16,34 @@ type Award = {
   order_index: number | null
 }
 
+// İlk HTML'de üç ödül görünür; API kayıtları yüklenince yönetim panelindeki sıra kullanılır.
 const FALLBACK_AWARDS: Award[] = [
   {
     id: -1,
-    title: "TEKNOFEST'ten bir kare",
-    description: "Proje standımız ve ödüllerimizden bir fotoğraf.",
-    image_url: "/oduller.JPG",
-    location: null,
-    date: null,
+    title: "Selçuk Ödülleri 2026 — Temsil Ödülü",
+    description: "Selçuk Üniversitesi ödül töreninde verilen Temsil Ödülü.",
+    image_url: "/public/awards/selcuk-temsil-2026.jpg",
+    location: "Konya",
+    date: "2026-05-21",
     order_index: 0,
+  },
+  {
+    id: -2,
+    title: "TEKNOFEST İstanbul 2025 Ödül Töreni",
+    description: "TEKNOFEST İstanbul 2025 ödül töreninden bir kare.",
+    image_url: "/public/awards/teknofest-istanbul-2025.jpg",
+    location: "İstanbul",
+    date: "2025-09-21",
+    order_index: 1,
+  },
+  {
+    id: -3,
+    title: "TEKNOFEST Adana 2024 Madalyaları",
+    description: "TEKNOFEST Adana'da kazanılan madalya ve kupalarımız.",
+    image_url: "/public/awards/teknofest-adana-2024.jpg",
+    location: "Adana",
+    date: null,
+    order_index: 2,
   },
 ]
 
@@ -34,10 +53,8 @@ function fmtTRDate(d: string) {
   return dt.toLocaleDateString("tr-TR", { day: "2-digit", month: "long", year: "numeric" })
 }
 
-/** "Ödüllerimiz" — /awards endpoint'inden topluluğun aldığı ödül ve başarılar. Tam genişlik, tek kart, yatay slayt geçişli. */
 export function AwardsSection() {
   const [awards, setAwards] = useState<Award[]>(FALLBACK_AWARDS)
-  const [activeIndex, setActiveIndex] = useState(0)
 
   useEffect(() => {
     const fetchAwards = async () => {
@@ -45,122 +62,73 @@ export function AwardsSection() {
         const response = await fetch(`${API_BASE}/awards`)
         if (!response.ok) throw new Error("Ödüller verisi alınamadı.")
         const data: Award[] = await response.json()
-        setAwards(data.length ? data : FALLBACK_AWARDS)
-      } catch (err: any) {
-        setAwards(FALLBACK_AWARDS)
+        if (data.length) setAwards(data)
+      } catch (err) {
         console.error("Ödüller çekilirken hata:", err)
       }
     }
     fetchAwards()
   }, [])
 
-  const goTo = (i: number) => setActiveIndex(Math.max(0, Math.min(i, awards.length - 1)))
-  const goPrev = () => goTo(activeIndex - 1)
-  const goNext = () => goTo(activeIndex + 1)
-
-  const active = awards[activeIndex]
-
-  if (!active) return null
-
   return (
-    <div className="space-y-4">
-      <div className="relative overflow-hidden rounded-2xl">
-        <div key={active.id} className="award-text-in">
-          <div className="flex flex-row rounded-2xl border border-white/[0.08] bg-[#0D1726] overflow-hidden min-h-[180px] sm:min-h-[320px]">
-            <div className="relative w-36 sm:w-64 md:w-80 h-auto flex-shrink-0 bg-white/[0.03] flex items-center justify-center overflow-hidden">
-              {active.image_url ? (
+    <div className="grid gap-5 lg:grid-cols-3">
+      {awards.map((award, index) => {
+        const imageUrl = normalizeImageUrl(award.image_url)
+        return (
+          <article
+            key={award.id}
+            className="award-text-in group flex flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0D1726] transition-colors hover:border-[#22D3EE]/30"
+            style={{ animationDelay: `${index * 100}ms` }}
+          >
+            <div className="relative h-64 bg-white/[0.03] sm:h-80 lg:h-72">
+              {imageUrl ? (
                 <Image
-                  key={active.id}
-                  src={active.id === -1 ? "/oduller.JPG" : normalizeImageUrl(active.image_url) || "/placeholder.svg"}
-                  alt={active.title}
+                  src={imageUrl}
+                  alt={award.title}
                   fill
-                  sizes="(max-width: 640px) 40vw, 320px"
-                  className="object-contain award-photo-kenburns"
-                  quality={80}
-                  priority
+                  sizes="(max-width: 1024px) 100vw, 33vw"
+                  className="object-contain"
+                  quality={85}
+                  priority={index === 0}
                 />
               ) : (
-                <Trophy className="w-8 h-8 sm:w-12 sm:h-12 text-[#22D3EE]/40" />
-              )}
-            </div>
-
-            <div className="flex-1 min-w-0 p-4 sm:p-7 md:p-8 flex flex-col justify-center">
-              <h4 className="award-text-in font-display font-semibold text-base sm:text-xl text-foreground" style={{ animationDelay: "80ms" }}>
-                {active.title}
-              </h4>
-              <p
-                className="award-text-in text-muted-foreground text-sm sm:text-base leading-relaxed mt-2"
-                style={{ animationDelay: "220ms" }}
-              >
-                {active.description}
-              </p>
-
-              {(active.date || active.location) && (
-                <div
-                  className="award-text-in flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-white/10"
-                  style={{ animationDelay: "360ms" }}
-                >
-                  {active.date && (
-                    <div className="flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5" />
-                      <span>{fmtTRDate(active.date)}</span>
-                    </div>
-                  )}
-                  {active.location && (
-                    <div className="flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5" />
-                      <span>{active.location}</span>
-                    </div>
-                  )}
+                <div className="flex h-full items-center justify-center">
+                  <Trophy className="h-12 w-12 text-[#22D3EE]/40" />
                 </div>
               )}
             </div>
-          </div>
-        </div>
-
-        {awards.length > 1 && (
-          <>
-            <button
-              type="button"
-              onClick={goPrev}
-              disabled={activeIndex === 0}
-              aria-label="Önceki"
-              className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-10 inline-flex items-center justify-center w-11 h-11 sm:w-10 sm:h-10 rounded-full bg-background/80 border border-foreground/15 hover:border-[#22D3EE]/50 backdrop-blur-sm transition disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
-              type="button"
-              onClick={goNext}
-              disabled={activeIndex === awards.length - 1}
-              aria-label="Sonraki"
-              className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-10 inline-flex items-center justify-center w-11 h-11 sm:w-10 sm:h-10 rounded-full bg-background/80 border border-foreground/15 hover:border-[#22D3EE]/50 backdrop-blur-sm transition disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </>
-        )}
-      </div>
-
-      {awards.length > 1 && (
-        <div className="flex justify-center gap-2">
-          {awards.map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => goTo(i)}
-              className="p-2.5 -m-2.5 flex items-center"
-              aria-label={`${i + 1}. ödüle git`}
-            >
-              <span
-                className={`h-1.5 rounded-full transition-all duration-300 block ${
-                  i === activeIndex ? "w-6 bg-[#22D3EE]" : "w-1.5 bg-muted-foreground/30"
-                }`}
-              />
-            </button>
-          ))}
-        </div>
-      )}
+            <div className="flex flex-1 flex-col p-5 sm:p-6">
+              <h3 className="font-display text-lg font-semibold text-foreground">{award.title}</h3>
+              <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">{award.description}</p>
+              <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border-t border-white/10 pt-4 text-xs text-muted-foreground">
+                {award.date && (
+                  <span className="inline-flex items-center gap-1.5">
+                    <Calendar className="h-3.5 w-3.5" />
+                    {fmtTRDate(award.date)}
+                  </span>
+                )}
+                {award.location && (
+                  <span className="inline-flex items-center gap-1.5">
+                    <MapPin className="h-3.5 w-3.5" />
+                    {award.location}
+                  </span>
+                )}
+              </div>
+              {imageUrl && (
+                <a
+                  href={imageUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-flex items-center gap-1.5 self-start text-sm text-[#22D3EE] hover:underline"
+                >
+                  <Maximize2 className="h-4 w-4" />
+                  Fotoğrafı tam boy aç
+                </a>
+              )}
+            </div>
+          </article>
+        )
+      })}
     </div>
   )
 }
