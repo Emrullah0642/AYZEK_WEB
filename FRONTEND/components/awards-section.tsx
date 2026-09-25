@@ -36,8 +36,7 @@ function fmtTRDate(d: string) {
 
 /** "Ödüllerimiz" — /awards endpoint'inden topluluğun aldığı ödül ve başarılar. Tam genişlik, tek kart, yatay slayt geçişli. */
 export function AwardsSection() {
-  const [awards, setAwards] = useState<Award[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [awards, setAwards] = useState<Award[]>(FALLBACK_AWARDS)
   const [activeIndex, setActiveIndex] = useState(0)
 
   useEffect(() => {
@@ -50,8 +49,6 @@ export function AwardsSection() {
       } catch (err: any) {
         setAwards(FALLBACK_AWARDS)
         console.error("Ödüller çekilirken hata:", err)
-      } finally {
-        setIsLoading(false)
       }
     }
     fetchAwards()
@@ -61,9 +58,6 @@ export function AwardsSection() {
   const goPrev = () => goTo(activeIndex - 1)
   const goNext = () => goTo(activeIndex + 1)
 
-  if (isLoading) {
-    return <p className="text-center text-sm text-muted-foreground py-16">Ödüller yükleniyor...</p>
-  }
   const active = awards[activeIndex]
 
   if (!active) return null

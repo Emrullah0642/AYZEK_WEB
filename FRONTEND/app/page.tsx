@@ -395,9 +395,7 @@ export default function HomePage() {
                 {text("awards_description")}
               </p>
             </ScrollAnimation>
-            <ScrollAnimation animation="fade-up" delay={150}>
-              <AwardsSection />
-            </ScrollAnimation>
+            <AwardsSection />
           </div>
         </InlineEditWrapper>
       </section>
