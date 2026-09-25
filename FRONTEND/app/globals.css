@@ -591,37 +591,6 @@
   }
 }
 
-/* Etkinlik galerisi — aktif kart hover'da 3D dönüp detayları gösterir */
-.flip-card-scene {
-  perspective: 1600px;
-}
-.flip-card-inner {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
-  transform-style: preserve-3d;
-}
-.flip-card-scene:hover .flip-card-inner,
-.flip-card-scene:focus-within .flip-card-inner {
-  transform: rotateY(180deg);
-}
-.flip-card-face {
-  position: absolute;
-  inset: 0;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-.flip-card-front {
-  transform: rotateY(0deg);
-}
-.flip-card-back {
-  transform: rotateY(180deg);
-}
-@media (prefers-reduced-motion: reduce) {
-  .flip-card-inner { transition: none; }
-}
-
 /* 3) Yardımcı sınıflar (kullan-at) */
 @layer utilities {
   /* Safe-area padding yardımcıları (Navbar/Footer vb.) */
