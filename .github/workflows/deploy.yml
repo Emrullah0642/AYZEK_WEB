@@ -23,6 +23,7 @@ jobs:
           script: |
             set -e
             cd /opt/ayzek
+            git remote set-url origin https://github.com/sadikbilal/AYZEK_WEB.git
             git fetch origin main
             git reset --hard origin/main
             docker compose up -d --build --remove-orphans
