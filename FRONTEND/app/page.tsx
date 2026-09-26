@@ -30,7 +30,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { CountUp } from "@/components/count-up";
-import { KineticHeading } from "@/components/kinetic-heading";
+import { CommunityStart } from "@/components/community-start";
 import { MagneticButton } from "@/components/magnetic-button";
 import { SiteFooter } from "@/components/site-footer";
 import { toast } from "sonner";
@@ -138,26 +138,12 @@ const SECTION_TITLES: Record<string, string> = {
   stats: "İstatistikleri Düzenle",
 };
 
-/** "Satır 1\nSatır 2" → KineticHeading'in beklediği kelime kelime dizi (yeni satır = breakBefore). */
-function toKineticWords(text: string): { text: string; breakBefore?: boolean }[] {
-  const words: { text: string; breakBefore?: boolean }[] = [];
-  text.split("\n").forEach((line, lineIndex) => {
-    line
-      .trim()
-      .split(/\s+/)
-      .filter(Boolean)
-      .forEach((w, wordIndex) => {
-        words.push({ text: w, breakBefore: lineIndex > 0 && wordIndex === 0 });
-      });
-  });
-  return words;
-}
-
 export default function HomePage() {
   const [editingSection, setEditingSection] = useState<string | null>(null);
 
   // Yönetim panelinde duyurulan yaklaşan etkinlikler; geçmiş etkinlikler galeri arşivinden gösterilir.
   const [events, setEvents] = useState<Event[]>([]);
+  const [eventsStatus, setEventsStatus] = useState<"loading" | "ready" | "error">("loading");
 
   const [isEventSuggestOpen, setIsEventSuggestOpen] = useState(false);
   const [eventSuggestForm, setEventSuggestForm] = useState({ title: "", description: "", contact: "" });
@@ -182,14 +168,16 @@ export default function HomePage() {
           tags: event.tags ? (typeof event.tags === "string" ? event.tags.split(",") : event.tags) : [],
         }));
         setEvents(formatted);
+        setEventsStatus("ready");
       } catch (err: any) {
+        setEventsStatus("error");
         console.error("Etkinlikler çekilirken bir hata oluştu:", err);
       }
     };
     fetchAllEvents();
   }, []);
 
-  const upcomingEvents = events.filter((event) => new Date(event.date).getTime() >= Date.now());
+  const upcomingEvents = events.filter((event) => new Date(event.date).getTime() >= Date.now()).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   const handleEventSuggestSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -226,19 +214,6 @@ export default function HomePage() {
     icon,
   }));
 
-  // Hero arka plan glow'ları için hafif mouse parallax — birkaç piksel, abartısız
-  const handleHeroParallax = (e: React.MouseEvent<HTMLElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    e.currentTarget.style.setProperty("--mx", `${x * 16}px`);
-    e.currentTarget.style.setProperty("--my", `${y * 16}px`);
-  };
-  const handleHeroParallaxReset = (e: React.MouseEvent<HTMLElement>) => {
-    e.currentTarget.style.setProperty("--mx", "0px");
-    e.currentTarget.style.setProperty("--my", "0px");
-  };
-
   // Handler fonksiyonları
   const handleEditSection = (section: string) => setEditingSection(section);
   const handleSaveContent = async (data: Record<string, string>) => {
@@ -257,102 +232,50 @@ export default function HomePage() {
     <div className="min-h-screen bg-transparent relative z-10 theme-transition overflow-x-hidden">
       <AdminNavbar />
 
-      {/* HERO — sol metin, sağda yörüngeli logo paneli */}
-      <section
-        className="relative px-4 pt-16 sm:pt-20 md:pt-24 pb-14 sm:pb-20 overflow-hidden"
-        onMouseMove={handleHeroParallax}
-        onMouseLeave={handleHeroParallaxReset}
-      >
-        {/* Ambiyans glow — yalnızca hero'ya özel, blur burada bilinçli ve tek seferlik kullanılıyor. Mouse ile birkaç piksel kayar (hafif parallax). */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 w-[110vw] max-w-[900px] h-[560px] opacity-90 transition-transform duration-500 ease-out"
-          style={{
-            background: "radial-gradient(ellipse 50% 55% at 50% 30%, rgba(37,99,235,0.16), transparent 70%)",
-            transform: "translate(var(--mx, 0px), var(--my, 0px))",
-          }}
-        />
-        <div
-          className="dark:block hidden pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 w-[110vw] max-w-[1000px] h-[620px] transition-transform duration-500 ease-out"
-          aria-hidden="true"
-          style={{
-            background: "radial-gradient(ellipse 45% 55% at 50% 25%, rgba(34,211,238,0.22), transparent 70%)",
-            transform: "translate(calc(var(--mx, 0px) * -1), calc(var(--my, 0px) * -1))",
-          }}
-        />
-
+      <a href="#ana-icerik" className="skip-link">Ana içeriğe geç</a>
+      <main id="ana-icerik" tabIndex={-1}>
+      <section className="community-hero">
         <div className="container max-w-screen-xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] lg:grid-rows-[auto_auto] gap-10 lg:gap-8 items-center">
-            {/* Sol: başlık + alt metin */}
-            <InlineEditWrapper
-              onEdit={() => handleEditSection("hero")}
-              className="relative flex flex-col items-center text-center lg:items-start lg:text-left order-1 lg:col-start-1 lg:row-start-1"
-            >
-              <KineticHeading
-                className="font-display font-bold tracking-tight text-4xl sm:text-6xl md:text-7xl leading-[1.05] max-w-2xl text-foreground dark:drop-shadow-[0_0_40px_rgba(34,211,238,0.25)]"
-                words={toKineticWords(text("hero_title"))}
-              />
-
-              <p className="text-muted-foreground max-w-xl text-lg sm:text-xl leading-relaxed mt-5 sm:mt-6">
-                {text("hero_subtitle")}
-              </p>
+          <div className="hero-layout">
+            <InlineEditWrapper onEdit={() => handleEditSection("hero")} className="hero-copy">
+              <p className="section-eyebrow"><span /> SELÇUK ÜNİVERSİTESİ · AYZEK</p>
+              <h1 className="hero-title whitespace-pre-line">{text("hero_title")}</h1>
+              <p className="hero-description">{text("hero_subtitle")}</p>
+              <div className="flex flex-wrap gap-3 mt-8">
+                <Button asChild size="lg" className="rounded-xl bg-cyan-300 text-slate-950 hover:bg-cyan-200 px-6 h-12">
+                  <Link href="/join">{text("hero_cta_primary")}<ArrowRight className="ml-2 h-4 w-4" /></Link>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="rounded-xl border-white/20 bg-white/[0.03] px-6 h-12">
+                  <Link href="#etkinlikler">{text("hero_cta_secondary")}</Link>
+                </Button>
+              </div>
+              <p className="mt-5 text-sm text-muted-foreground">Merakın yeter. Birlikte öğrenmek için buradayız.</p>
             </InlineEditWrapper>
-
-            {/* Sağ: logo, ışıklı kaide ve yörüngede dönen üye fotoğrafları */}
-            <div className="relative w-full h-[300px] sm:h-[360px] lg:h-[440px] order-2 lg:col-start-2 lg:row-start-1 lg:row-span-2">
-              {/* eş merkezli halkalar */}
-              <div className="absolute inset-[6%] rounded-full border border-primary/10" />
-              <div className="absolute inset-[16%] rounded-full border border-primary/15" />
-              <div className="absolute inset-[26%] rounded-full border border-primary/10" />
-
-              {/* ışıklı kaide */}
-              <div className="absolute left-1/2 bottom-[14%] -translate-x-1/2 w-52 sm:w-60 h-14 rounded-[50%] bg-primary/30 blur-2xl" />
-              <div className="absolute left-1/2 bottom-[16%] -translate-x-1/2 w-40 sm:w-48 h-8 rounded-[50%] bg-gradient-to-b from-primary/70 to-accent/50 border border-primary/40" />
-
-              {/* logo — kaidenin üzerinde hafifçe yüzüyor */}
-              <div className="absolute left-1/2 top-[38%] -translate-x-1/2 -translate-y-1/2 animate-float">
-                <div className="relative w-36 h-36 sm:w-44 sm:h-44 lg:w-48 lg:h-48">
-                  <Image src="/ayzek-logo.png" alt="AYZEK" fill priority className="object-contain dark:drop-shadow-[0_0_45px_rgba(34,211,238,0.55)]" />
+            <div className="hero-photo-wrap">
+              <div className="hero-photo">
+                <Image src="/toplu.jpg" alt="AYZEK topluluğu üyeleri bir arada" fill priority sizes="(max-width: 1023px) 100vw, 50vw" className="object-cover" />
+                <div className="hero-photo-shade" />
+                <span className="hero-photo-label">BİRLİKTE DAHA FAZLASI</span>
+                <div className="hero-photo-caption">
+                  <span>Bir topluluktan<br />çok daha fazlası.</span>
+                  <a href="#ekibimiz" aria-label="AYZEK ekibiyle tanış" className="hero-photo-link"><ArrowRight className="h-5 w-5" /></a>
                 </div>
               </div>
+              <div className="hero-photo-note"><span className="text-cyan-300">✳</span> Fikirden projeye, kampüsten geleceğe.</div>
             </div>
-
-            {/* Butonlar — mobilde logonun altında, masaüstünde metnin altında (sol sütun) */}
-            <InlineEditWrapper
-              onEdit={() => handleEditSection("hero")}
-              className="order-3 lg:col-start-1 lg:row-start-2 flex flex-wrap items-center justify-center lg:justify-start gap-3"
-            >
-              <MagneticButton className="flex-shrink-0">
-                <Button asChild size="lg" className="rounded-full bg-ayzek-gradient hover:opacity-90 btn-hover-scale btn-sweep text-primary-foreground px-7 shadow-[0_0_30px_-6px_rgba(37,99,235,0.55)] whitespace-nowrap">
-                  <Link href="/join">
-                    {text("hero_cta_primary")}
-                    <ArrowRight className="w-4 h-4 ml-1.5" />
-                  </Link>
-                </Button>
-              </MagneticButton>
-              <Button asChild size="lg" variant="outline" className="rounded-full border-foreground/20 text-foreground hover:bg-foreground/[0.06] px-6 flex-shrink-0 whitespace-nowrap">
-                <Link href="/#etkinlikler">{text("hero_cta_secondary")}</Link>
-              </Button>
-            </InlineEditWrapper>
           </div>
-
-          {/* İstatistikler — ortalanmış, ayraçsız */}
-          <InlineEditWrapper onEdit={() => handleEditSection("stats")} className="mt-14 sm:mt-16">
-            <ScrollAnimation animation="fade-in" delay={150} className="relative grid grid-cols-2 sm:grid-cols-4 justify-items-center gap-y-6 gap-x-6 sm:gap-x-12 md:gap-x-16">
-              {stats.map((s, i) => (
-                <div key={i} className="flex flex-col items-center">
-                  <div className="font-display font-bold text-4xl sm:text-5xl text-primary leading-none">
-                    <CountUp value={s.value} />
-                  </div>
-                  <div className="text-xs sm:text-sm font-medium tracking-wide text-muted-foreground mt-2 uppercase">
-                    {s.label}
-                  </div>
-                </div>
-              ))}
-            </ScrollAnimation>
+          <InlineEditWrapper onEdit={() => handleEditSection("stats")} className="hero-stats">
+            {stats.map((stat, i) => (
+              <div key={i} className="hero-stat">
+                <stat.icon className="h-4 w-4 text-cyan-300 mb-3" aria-hidden="true" />
+                <div className="text-3xl sm:text-4xl font-semibold tracking-tight"><CountUp value={stat.value} /></div>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-2">{stat.label}</p>
+              </div>
+            ))}
           </InlineEditWrapper>
         </div>
       </section>
+      <CommunityStart />
 
       <InlineEditWrapper className="relative py-3 sm:py-4 md:py-5 px-0 sm:px-4">
         <div className="container max-w-screen-xl mx-auto px-2 sm:px-4 md:px-0">
@@ -361,41 +284,6 @@ export default function HomePage() {
           </ScrollAnimation>
         </div>
       </InlineEditWrapper>
-
-      {/* ============ HAKKIMIZDA ============ */}
-      <section id="hakkimizda" className="scroll-mt-header">
-        <InlineEditWrapper onEdit={() => handleEditSection("about")} className="section-band py-10 sm:py-14 md:py-18 px-3 sm:px-4">
-          <div className="container max-w-screen-xl mx-auto">
-            <ScrollAnimation animation="fade-up" className="max-w-3xl mb-8 sm:mb-10">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold text-foreground mb-4">{text("about_title")}</h2>
-              <p className="text-muted-foreground text-base sm:text-lg leading-relaxed">
-                {text("about_description")}
-              </p>
-              <p className="text-muted-foreground text-base sm:text-lg leading-relaxed mt-4">
-                {text("about_extra")}
-              </p>
-            </ScrollAnimation>
-            <ScrollAnimation animation="fade-up" delay={150}>
-              <MissionValues />
-            </ScrollAnimation>
-          </div>
-        </InlineEditWrapper>
-      </section>
-
-      {/* ============ ÖDÜLLERİMİZ ============ */}
-      <section id="odullerimiz" className="scroll-mt-header">
-        <InlineEditWrapper onEdit={() => handleEditSection("awards")} className="section-band py-10 sm:py-14 md:py-18 px-3 sm:px-4">
-          <div className="container max-w-screen-xl mx-auto">
-            <ScrollAnimation animation="fade-up" className="text-center mb-6 sm:mb-8">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold mb-2 text-foreground">{text("awards_title")}</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base md:text-lg px-2 leading-snug">
-                {text("awards_description")}
-              </p>
-            </ScrollAnimation>
-            <AwardsSection />
-          </div>
-        </InlineEditWrapper>
-      </section>
 
       {/* ============ ETKİNLİKLER ============ */}
       <section id="etkinlikler" className="scroll-mt-header">
@@ -407,15 +295,19 @@ export default function HomePage() {
                 {text("events_description")}
               </p>
             </ScrollAnimation>
-            <ScrollAnimation animation="fade-up" delay={200}>
-              <CommunityEventHighlights />
-            </ScrollAnimation>
-            {upcomingEvents.length > 0 && (
-              <div className="mt-12">
-                <h3 className="mb-5 font-display text-xl font-semibold text-foreground sm:text-2xl">Yaklaşan etkinlikler</h3>
+            <div className="mb-10 rounded-2xl border border-cyan-300/15 bg-cyan-300/[0.03] p-5 sm:p-7">
+              <div className="flex items-center gap-3 mb-4"><Calendar className="h-5 w-5 text-cyan-300" /><h3 className="text-xl font-semibold">Sıradaki buluşmamız</h3></div>
+              {eventsStatus === "loading" ? (
+                <p role="status" className="text-muted-foreground">Etkinlik takvimi yükleniyor…</p>
+              ) : eventsStatus === "error" ? (
+                <p role="status" className="text-muted-foreground">Etkinlik takvimine şu anda ulaşılamıyor. Biraz sonra tekrar deneyebilir veya <a href="https://www.instagram.com/20ayzek22" target="_blank" rel="noopener noreferrer" className="text-cyan-300 underline underline-offset-4">Instagram hesabımızdaki duyurulara</a> göz atabilirsin.</p>
+              ) : upcomingEvents.length > 0 ? (
                 <EventsCalendar events={upcomingEvents} loading={false} />
-              </div>
-            )}
+              ) : (
+                <p className="text-muted-foreground leading-relaxed">Yeni etkinlikler duyurulduğunda burada yer alacak. Bu sırada <Link href="/join" className="text-cyan-300 underline underline-offset-4">topluluğa katılabilir</Link> ve geçmiş buluşmalarımızı keşfedebilirsin.</p>
+              )}
+            </div>
+            <CommunityEventHighlights />
           </div>
         </InlineEditWrapper>
 
@@ -508,6 +400,34 @@ export default function HomePage() {
         </InlineEditWrapper>
       </section>
 
+      <section id="hakkimizda" className="scroll-mt-header about-story-section">
+        <div className="container max-w-screen-xl mx-auto">
+          <InlineEditWrapper onEdit={() => handleEditSection("about")} className="about-story-intro">
+            <div>
+              <p className="story-kicker">BİZİ TANI</p>
+              <h2>{text("about_title")}<span aria-hidden="true">.</span></h2>
+              <p className="about-story-tagline">Aynı merak.<br />Binbir farklı fikir.</p>
+            </div>
+            <div className="about-story-text">
+              <p>{text("about_description")}</p>
+              <p>{text("about_extra")}</p>
+              <a href="#ekibimiz" className="story-text-link">Bu topluluğun insanlarıyla tanış <ArrowRight size={17} /></a>
+            </div>
+          </InlineEditWrapper>
+          <MissionValues />
+        </div>
+      </section>
+
+      <section id="odullerimiz" className="scroll-mt-header awards-story-section">
+        <div className="container max-w-screen-xl mx-auto">
+          <InlineEditWrapper onEdit={() => handleEditSection("awards")} className="awards-story-heading">
+            <div><p className="story-kicker">03 / BİRLİKTE BAŞARDIK</p><h2>{text("awards_title")}</h2></div>
+            <p>{text("awards_description")}</p>
+          </InlineEditWrapper>
+          <AwardsSection />
+        </div>
+      </section>
+
       {/* ============ BİZİM EKİBİMİZ ============ */}
       <section id="ekibimiz" className="scroll-mt-header">
         <InlineEditWrapper onEdit={() => handleEditSection("crew")} className="section-band py-10 sm:py-14 md:py-18 px-3 sm:px-4">
@@ -572,6 +492,7 @@ export default function HomePage() {
         </div>
       </InlineEditWrapper>
 
+      </main>
       <SiteFooter />
 
       {editingSection && SECTION_FIELDS[editingSection] && (

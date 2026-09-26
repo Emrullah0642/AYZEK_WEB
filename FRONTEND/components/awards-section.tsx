@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Trophy, Calendar, MapPin, Maximize2 } from "lucide-react"
+import { Trophy, Calendar, MapPin, ArrowUpRight } from "lucide-react"
 import Image from "next/image"
 import { API_BASE } from "@/lib/api"
 import { normalizeImageUrl } from "@/lib/normalize-image-url"
@@ -83,6 +83,8 @@ function fmtTRDate(d: string) {
 export function AwardsSection() {
   const [awards, setAwards] = useState<Award[]>(FALLBACK_AWARDS)
 
+  const [selectedId, setSelectedId] = useState<number | null>(null)
+
   useEffect(() => {
     const fetchAwards = async () => {
       try {
@@ -97,65 +99,41 @@ export function AwardsSection() {
     fetchAwards()
   }, [])
 
+  const selected = awards.find((award) => award.id === selectedId) ?? awards[0]
+  const imageUrl = normalizeImageUrl(selected?.image_url)
+
+  if (!selected) return null
+
   return (
-    <div className="grid gap-5 lg:grid-cols-3">
-      {awards.map((award, index) => {
-        const imageUrl = normalizeImageUrl(award.image_url)
-        return (
-          <article
-            key={award.id}
-            className="award-text-in group flex flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0D1726] transition-colors hover:border-[#22D3EE]/30"
-            style={{ animationDelay: `${index * 100}ms` }}
-          >
-            <div className="relative h-64 bg-white/[0.03] sm:h-80 lg:h-72">
-              {imageUrl ? (
-                <Image
-                  src={imageUrl}
-                  alt={award.title}
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 33vw"
-                  className="object-contain"
-                  quality={85}
-                  priority={index === 0}
-                />
-              ) : (
-                <div className="flex h-full items-center justify-center">
-                  <Trophy className="h-12 w-12 text-[#22D3EE]/40" />
-                </div>
-              )}
-            </div>
-            <div className="flex flex-1 flex-col p-5 sm:p-6">
-              <h3 className="font-display text-lg font-semibold text-foreground">{award.title}</h3>
-              <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">{award.description}</p>
-              <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border-t border-white/10 pt-4 text-xs text-muted-foreground">
-                {award.date && (
-                  <span className="inline-flex items-center gap-1.5">
-                    <Calendar className="h-3.5 w-3.5" />
-                    {fmtTRDate(award.date)}
-                  </span>
-                )}
-                {award.location && (
-                  <span className="inline-flex items-center gap-1.5">
-                    <MapPin className="h-3.5 w-3.5" />
-                    {award.location}
-                  </span>
-                )}
-              </div>
-              {imageUrl && (
-                <a
-                  href={imageUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-4 inline-flex items-center gap-1.5 self-start text-sm text-[#22D3EE] hover:underline"
-                >
-                  <Maximize2 className="h-4 w-4" />
-                  Fotoğrafı tam boy aç
-                </a>
-              )}
-            </div>
-          </article>
-        )
-      })}
+    <div className="awards-showcase">
+      <div className="award-feature" id="award-detail" role="region" aria-label="Seçili ödül" aria-live="polite">
+        <div className="award-feature-image">
+          {imageUrl ? (
+            <Image key={imageUrl} src={imageUrl} alt={selected.title} fill sizes="(max-width: 767px) 100vw, 50vw" className="object-contain" quality={85} />
+          ) : <Trophy className="h-16 w-16 text-amber-200/50" />}
+          <span className="award-feature-badge"><Trophy size={14} /> AYZEK BAŞARILARI</span>
+        </div>
+        <div className="award-feature-copy">
+          <div className="award-feature-meta">
+            {selected.date && <span><Calendar size={13} />{fmtTRDate(selected.date)}</span>}
+            {selected.location && <span><MapPin size={13} />{selected.location}</span>}
+          </div>
+          <h3>{selected.title}</h3>
+          <p>{selected.description}</p>
+          {imageUrl && <a href={imageUrl} target="_blank" rel="noopener noreferrer" className="story-text-link">Fotoğrafı incele <ArrowUpRight size={16} /></a>}
+        </div>
+      </div>
+      <div className="award-index">
+        <p className="award-index-label">EMEĞİN İZLERİ <span>{String(awards.length).padStart(2, "0")} BAŞARI</span></p>
+        {awards.map((award, index) => (
+          <button type="button" key={award.id} className="award-index-item" aria-pressed={award.id === selected.id} aria-controls="award-detail" onClick={() => setSelectedId(award.id)}>
+            <span className="award-index-number">{String(index + 1).padStart(2, "0")}</span>
+            <span className="award-index-text"><span>{award.title}</span><small>{[award.location, award.date?.slice(0, 4)].filter(Boolean).join(" · ")}</small></span>
+            <ArrowUpRight size={19} aria-hidden="true" />
+          </button>
+        ))}
+        <p className="award-index-note">Her başarının arkasında birlikte çalışan bir ekip var.</p>
+      </div>
     </div>
   )
 }

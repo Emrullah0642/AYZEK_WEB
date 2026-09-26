@@ -6,7 +6,6 @@ import "./globals.css"
 import { AdminProvider } from "@/contexts/admin-context"
 import { ThemeProvider } from "@/components/theme-provider"
 import AnimatedBg from "@/components/ui/animated-bg"
-import { SplashScreen } from "@/components/splash-screen"
 import { NotificationsProvider } from "@/contexts/notifications"
 import { Toaster } from "@/components/ui/sonner"
 import { GoogleTagManager } from '@next/third-parties/google'
@@ -14,10 +13,10 @@ import { GoogleTagManager } from '@next/third-parties/google'
 export const metadata: Metadata = {
   metadataBase: new URL('https://ayzek.tr'), // Domain bağlanınca burası güncellenmeli
   title: {
-    default: "AYZEK - Topluluk Hafızası & Etkinlik Vitrini",
+    default: "AYZEK | Selçuk Üniversitesi Teknoloji Topluluğu",
     template: "%s | AYZEK"
   },
-  description: "Topluluk başarılarını sergileyen, etkinlikleri ölümsüzleştiren ve üyeleri bir araya getiren modern topluluk platformu.",
+  description: "Selçuk Üniversitesi AYZEK topluluğuyla yapay zekâ ve yazılımı keşfet. Eğitimlere katıl, projeler üret ve teknolojiye meraklı öğrencilerle tanış.",
   keywords: ["Ayzek", "Topluluk", "Etkinlik", "Yazılım", "Teknoloji", "Takım"],
   authors: [{ name: "Ayzek Team" }],
   creator: "Ayzek",
@@ -25,23 +24,21 @@ export const metadata: Metadata = {
     type: "website",
     locale: "tr_TR",
     url: "https://ayzek.tr",
-    title: "AYZEK - Topluluk Hafızası & Etkinlik Vitrini",
-    description: "Topluluk başarılarını sergileyen, etkinlikleri ölümsüzleştiren ve üyeleri bir araya getiren modern topluluk platformu.",
+    title: "AYZEK | Selçuk Üniversitesi Teknoloji Topluluğu",
+    description: "Selçuk Üniversitesi AYZEK topluluğuyla yapay zekâ ve yazılımı keşfet. Eğitimlere katıl, projeler üret ve teknolojiye meraklı öğrencilerle tanış.",
     siteName: "AYZEK",
     images: [
       {
-        url: "/ayzek-logo.png",
-        width: 1200,
-        height: 630,
+        url: "/toplu.jpg",
         alt: "Ayzek Platform",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "AYZEK - Topluluk Hafızası & Etkinlik Vitrini",
-    description: "Topluluk başarılarını sergileyen, etkinlikleri ölümsüzleştiren ve üyeleri bir araya getiren modern topluluk platformu.",
-    images: ["/og-image.jpg"],
+    title: "AYZEK | Selçuk Üniversitesi Teknoloji Topluluğu",
+    description: "Selçuk Üniversitesi AYZEK topluluğuyla yapay zekâ ve yazılımı keşfet. Eğitimlere katıl, projeler üret ve teknolojiye meraklı öğrencilerle tanış.",
+    images: ["/toplu.jpg"],
   },
   robots: {
     index: true,
@@ -79,7 +76,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           {/* Global hareketli arka plan */}
           <AnimatedBg />
-          <SplashScreen />
           <NotificationsProvider>
             <AdminProvider>
               {children}

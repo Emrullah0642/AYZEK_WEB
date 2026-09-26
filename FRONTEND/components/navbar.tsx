@@ -26,7 +26,7 @@ const links = [
   { href: "/#ekibimiz", label: "Ekibimiz" },
 ]
 
-const SECTION_IDS = ["hakkimizda", "etkinlikler", "ekibimiz"]
+const SECTION_IDS = ["etkinlikler", "hakkimizda", "ekibimiz"]
 
 export function AdminNavbar() {
   const { isAdminLoggedIn } = useAdmin()
@@ -104,7 +104,7 @@ export function AdminNavbar() {
           </div>
 
           {/* Orta: Masaüstü menü */}
-          <nav className="hidden md:flex items-center gap-6 lg:gap-8 text-[15px] font-medium">
+          <nav aria-label="Ana menü" className="hidden md:flex items-center gap-6 lg:gap-8 text-[15px] font-medium">
             {links.map((l) => (
               <Link
                 key={l.href}
@@ -243,7 +243,7 @@ function MagneticNavCta() {
       asChild
       size="sm"
       className={cn(
-        "hidden md:inline-flex rounded-full px-4 font-semibold transition-all duration-200",
+        "inline-flex rounded-full px-3 sm:px-4 text-xs sm:text-sm font-semibold transition-all duration-200",
         "bg-[#22D3EE] text-[#061018] hover:bg-[#22D3EE] hover:-translate-y-0.5 hover:shadow-[0_6px_24px_-6px_rgba(34,211,238,0.55)]"
       )}
     >

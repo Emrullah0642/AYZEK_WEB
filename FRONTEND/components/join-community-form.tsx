@@ -16,7 +16,9 @@ export function JoinCommunityForm() {
 
       <CardContent className="p-0">
         <div className="w-full overflow-hidden rounded-lg sm:rounded-xl">
+          <p className="px-5 pb-5 text-sm text-black/80">Form açılmıyorsa <a href="https://forms.gle/9jLTrgpc5uSZCuVu8" target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 font-medium">başvuru formunu yeni sekmede açabilirsin</a>.</p>
           <iframe
+            title="AYZEK topluluğu başvuru formu"
             src="https://forms.gle/9jLTrgpc5uSZCuVu8"
             className="w-full h-[1700px] sm:h-[1400px] md:h-[1150px] lg:h-[950px]"
             frameBorder="0"
